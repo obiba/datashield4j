@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ Copyright (c) 2019 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses />.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <name>DataSHIELD for Java parent POM</name>
+
+  <groupId>org.obiba.datashield</groupId>
+  <artifactId>ds4j</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+
+    <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+
+    <REngine.version>0.6-8.1</REngine.version>
+    <junit.version>4.12</junit.version>
+
+    <!-- maven plugins -->
+    <bintray-maven-plugin.version>1.2.20180117184439</bintray-maven-plugin.version>
+    <maven-build-helper-plugin.version>1.8</maven-build-helper-plugin.version>
+    <maven-buildnumber-plugin.version>1.2</maven-buildnumber-plugin.version>
+    <maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
+    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+    <maven-findbugs-plugin.version>3.0.4</maven-findbugs-plugin.version>
+    <maven-javacc-plugin.version>2.6</maven-javacc-plugin.version>
+    <maven-javadoc-plugin.version>2.9</maven-javadoc-plugin.version>
+    <maven-pmd-plugin.version>3.1</maven-pmd-plugin.version>
+    <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
+    <maven-source-plugin.version>2.2</maven-source-plugin.version>
+  </properties>
+
+  <licenses>
+    <license>
+      <name>GNU Public License version 3</name>
+      <url>http://www.obiba.org/node/62</url>
+    </license>
+  </licenses>
+
+  <modules>
+    <module>ds4j-core</module>
+    <module>ds4j-r</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.obiba.datashield</groupId>
+        <artifactId>ds4j-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.rforge</groupId>
+        <artifactId>Rserve</artifactId>
+        <version>${REngine.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.rforge</groupId>
+        <artifactId>REngine</artifactId>
+        <version>${REngine.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+
+  </dependencyManagement>
+
+  <dependencies>
+
+  </dependencies>
+
+  <build>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>${maven-findbugs-plugin.version}</version>
+          <configuration>
+            <xmlOutput>true</xmlOutput>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.carrotgarden.maven</groupId>
+          <artifactId>bintray-maven-plugin</artifactId>
+          <version>${bintray-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>${maven-pmd-plugin.version}</version>
+          <configuration>
+            <linkXref>false</linkXref>
+            <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
+            <minimumTokens>30</minimumTokens>
+            <targetJdk>${maven.compiler.target}</targetJdk>
+            <rulesets>
+              <ruleset>https://github.com/obiba/conventions/raw/master/obiba-pmd-ruleset.xml</ruleset>
+            </rulesets>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${maven-build-helper-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <useSystemClassLoader>false</useSystemClassLoader>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>javacc-maven-plugin</artifactId>
+          <version>${maven-javacc-plugin.version}</version>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${maven-release-plugin.version}</version>
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>${maven-buildnumber-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>createBuildNumber</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+            <configuration>
+              <format>{0,date,yyyyMMddHHmmss}</format>
+              <items>
+                <item>timestamp</item>
+              </items>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/java</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+        <excludes>
+          <exclude>**/*.java</exclude>
+          <exclude>**/package.html</exclude>
+        </excludes>
+        <filtering>false</filtering>
+      </resource>
+
+      <resource>
+        <directory>${project.basedir}/src/main/resources</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+
+    <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+        <filtering>false</filtering>
+      </testResource>
+      <testResource>
+        <directory>${project.basedir}/src/test/resources</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+        <filtering>false</filtering>
+      </testResource>
+    </testResources>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>obiba-releases</id>
+      <name>Obiba Maven Releases Repository</name>
+      <url>https://dl.bintray.com/obiba/maven</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>obiba-snapshots</id>
+      <name>Obiba Maven Snapshots Repository</name>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>atlassian</id>
+      <name>Atlassian Maven Public</name>
+      <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>obiba-bintray</id>
+      <url>https://api.bintray.com/obiba/maven/</url>
+    </repository>
+    <snapshotRepository>
+      <id>obiba-artifactory</id>
+      <url>https://obiba.jfrog.io/obiba/libs-snapshot</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:https://github.com/obiba/datashield4j.git</connection>
+    <developerConnection>scm:git:https://github.com/obiba/datashield4j.git</developerConnection>
+    <url>https://github.com/obiba/datashield4j</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/obiba/datashield4j/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci.com/obiba/datashield4j</url>
+  </ciManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>OBiBa Users</name>
+      <post>obiba-users@googlegroups.com</post>
+      <archive>https://groups.google.com/forum/?fromgroups#!forum/obiba-users</archive>
+    </mailingList>
+  </mailingLists>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!-- Disable default deployer. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </plugin>
+
+          <!-- Enable alternative deployer. -->
+          <plugin>
+            <groupId>com.carrotgarden.maven</groupId>
+            <artifactId>bintray-maven-plugin</artifactId>
+            <configuration>
+              <skip>false</skip>
+              <subject>obiba</subject>
+              <repository>maven</repository>
+              <serverId>obiba-bintray</serverId>
+              <packageVcsUrl>https://github.com/obiba/datashield4j</packageVcsUrl>
+              <performCleanup>false</performCleanup>
+            </configuration>
+            <executions>
+              <!-- Activate "bintray:deploy" during "deploy" -->
+              <execution>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
