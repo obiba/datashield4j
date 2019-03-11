@@ -31,6 +31,6 @@ public interface DSServerRegistry {
    *
    * @return
    */
-  DSServer nexAvailableServer();
+  DSServer nextAvailableServer();
 
 }

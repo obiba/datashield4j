@@ -15,6 +15,23 @@ package org.obiba.datashield.core;
 public interface DSServer {
 
   /**
+   * Start the remote server (if such feature is supported).
+   */
+  void start();
+
+  /**
+   * Stop the remote server (if such feature is supported).
+   */
+  void stop();
+
+  /**
+   * Sanity check.
+   *
+   * @return true if the server is ready.
+   */
+  boolean isRunning();
+
+  /**
    * Make a new session for the given user name.
    *
    * @param user

@@ -15,6 +15,13 @@ package org.obiba.datashield.core;
 public interface DSProfile {
 
   /**
+   * Get unique profile name.
+   *
+   * @return
+   */
+  String getName();
+
+  /**
    * Get the DataSHIELD servers associated to the profile.
    *
    * @return

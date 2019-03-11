@@ -12,6 +12,9 @@ package org.obiba.datashield.core.impl;
 import org.obiba.datashield.core.DSMethod;
 import org.obiba.datashield.core.DSMethodType;
 
+/**
+ * A DataSHIELD method defined by a script.
+ */
 public class ScriptDSMethod implements DSMethod {
 
   private String name;

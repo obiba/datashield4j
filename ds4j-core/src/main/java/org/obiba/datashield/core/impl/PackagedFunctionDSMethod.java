@@ -12,6 +12,9 @@ package org.obiba.datashield.core.impl;
 import org.obiba.datashield.core.DSMethod;
 import org.obiba.datashield.core.DSMethodType;
 
+/**
+ * A DataSHIELD method declared by a package.
+ */
 public class PackagedFunctionDSMethod implements DSMethod {
 
   private String name;
