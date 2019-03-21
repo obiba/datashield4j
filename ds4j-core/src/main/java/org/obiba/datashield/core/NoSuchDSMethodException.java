@@ -9,6 +9,9 @@
  */
 package org.obiba.datashield.core;
 
+/**
+ * Thrown when a method is not found, which is a major failure that should be reported to the end user.
+ */
 public class NoSuchDSMethodException extends RuntimeException {
 
   private static final long serialVersionUID = -1295544695602633502L;

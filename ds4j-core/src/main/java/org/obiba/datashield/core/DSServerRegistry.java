@@ -1,5 +1,8 @@
 package org.obiba.datashield.core;
 
+/**
+ * Registry of DataSHIELD server, with a strategy for server resources allocation.
+ */
 public interface DSServerRegistry {
 
   /**

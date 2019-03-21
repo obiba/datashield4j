@@ -43,7 +43,7 @@ public class DefaultDSEnvironment implements DSEnvironment {
   }
 
   @Override
-  public void addMethod(DSMethod method) {
+  public void addOrUpdate(DSMethod method) {
     for(DSMethod m : getMethods()) {
       if(m.getName().equals(method.getName())) {
         methods.remove(m);
