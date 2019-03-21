@@ -50,16 +50,33 @@ public class PackagedFunctionDSMethod implements DSMethod {
     return name;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public String getFunction() {
     return function;
+  }
+
+  public void setFunction(String function) {
+    this.function = function;
   }
 
   public boolean hasPackage() {
     return pack != null;
   }
 
+
+  public void setPackage(String pack) {
+    this.pack = pack;
+  }
+
   public String getPackage() {
     return pack;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   public String getVersion() {

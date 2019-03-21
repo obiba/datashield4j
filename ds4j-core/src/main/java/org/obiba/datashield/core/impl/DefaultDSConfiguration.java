@@ -12,12 +12,13 @@ package org.obiba.datashield.core.impl;
 import org.obiba.datashield.core.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefaultDSConfiguration implements DSConfiguration {
 
   private List<DSEnvironment> environments = new ArrayList<>();
 
-  private final Map<String, DSOption> options = new HashMap<>();
+  private final Map<String, String> options = new HashMap<>();
 
   @Override
   public synchronized DSEnvironment getEnvironment(DSMethodType type) {
@@ -35,7 +36,8 @@ public class DefaultDSConfiguration implements DSConfiguration {
 
   @Override
   public Iterable<DSOption> getOptions() {
-    return options.values();
+    return options.keySet().stream().map(k -> new DefaultDSOption(k, options.get(k)))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -51,7 +53,7 @@ public class DefaultDSConfiguration implements DSConfiguration {
   @Override
   public DSOption getOption(String name) {
     if (options.containsKey(name)) {
-      return options.get(name);
+      return new DefaultDSOption(name, options.get(name));
     }
 
     throw new NoSuchElementException(name + " option does not exists");
@@ -69,7 +71,7 @@ public class DefaultDSConfiguration implements DSConfiguration {
 
   protected void addOption(String name, String value, boolean overwrite) {
     if (!overwrite && hasOption(name)) return;
-    options.put(name, new DefaultDSOption(name, value));
+    options.put(name, value);
   }
 
 }
