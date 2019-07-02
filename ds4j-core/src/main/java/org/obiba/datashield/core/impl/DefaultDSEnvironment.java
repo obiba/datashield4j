@@ -56,7 +56,7 @@ public class DefaultDSEnvironment implements DSEnvironment {
   @Override
   public DSMethod getMethod(String name) {
     return methods.stream().filter(ds -> ds.getName().equals(name))
-        .findFirst().orElseThrow(() -> new NoSuchDSMethodException(name));
+        .findFirst().orElseThrow(() -> new NoSuchDSMethodException(type, name));
   }
 
   @Override

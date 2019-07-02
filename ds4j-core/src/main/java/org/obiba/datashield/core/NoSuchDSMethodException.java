@@ -16,10 +16,18 @@ public class NoSuchDSMethodException extends RuntimeException {
 
   private static final long serialVersionUID = -1295544695602633502L;
 
+  private final DSMethodType type;
+
   private final String name;
 
-  public NoSuchDSMethodException(String name) {
+  public NoSuchDSMethodException(DSMethodType type, String name) {
+    super("No such DataSHIELD '" + type + "' method with name: " + name);
+    this.type = type;
     this.name = name;
+  }
+
+  public DSMethodType getType() {
+    return type;
   }
 
   public String getName() {
