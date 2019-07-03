@@ -14,7 +14,7 @@ See also [DataSHIELD Interface (DSI)](https://github.com/datashield/DSI) for ide
 
 This package defines the core classes of the DataSHIELD configuration, mainly:
 
-* methods (the allowed R functions, either package specific or scripted)
+* methods (the allowed functions, either package specific or scripted)
 * method types (either assignment, or aggregation)
 * options (the R options set at session start)
 
