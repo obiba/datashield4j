@@ -35,12 +35,14 @@ What is currently NOT included (because it is too data repository specific):
 Available in OBiBa's Maven repository: https://dl.bintray.com/obiba/maven
 
 ```
-<dependency>
-	<groupId>org.obiba.datashield</groupId>
-	<artifactId>ds4j-core</artifactId>
-	<version>${ds4j.version}</version>
-  <groupId>org.obiba.datashield</groupId>
-	<artifactId>ds4j-r</artifactId>
-	<version>${ds4j.version}</version>
-</dependency>
+  <dependency>
+    <groupId>org.obiba.datashield</groupId>
+    <artifactId>ds4j-core</artifactId>
+    <version>${ds4j.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.obiba.datashield</groupId>
+    <artifactId>ds4j-r</artifactId>
+    <version>${ds4j.version}</version>
+  </dependency>
 ```
