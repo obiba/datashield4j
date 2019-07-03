@@ -16,7 +16,7 @@ This package defines the core classes of the DataSHIELD configuration, mainly:
 
 * methods (the allowed functions, either package specific or scripted)
 * method types (either assignment, or aggregation)
-* options (the R options set at session start)
+* options (the options set at session start)
 
 These classes are not bound to a specific implementation language, despite only R is used at the moment.
 
