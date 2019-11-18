@@ -31,8 +31,7 @@ SKIP:
 
 TOKEN : /* Numeric Constants */
 {
-       < NUMBER: ["-"] <FLOAT>
-           | <FLOAT> ( ["e","E"] ([ "-","+"])? <FLOAT> )?
+       < NUMBER: ("-")? <FLOAT> ( ["e","E"] ([ "-","+"])? <FLOAT> )?
        >
  |     < RANGE: ( <DIGIT> )+ ":" ( <DIGIT> )+ >
  |     < #FLOAT: <INTEGER>
