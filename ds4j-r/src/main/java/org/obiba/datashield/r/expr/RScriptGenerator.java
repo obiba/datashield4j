@@ -47,43 +47,34 @@ public class RScriptGenerator implements DataShieldGrammarVisitor {
   @Override
   public Object visit(ASTfuncCall node, Object data) {
     StringBuilder sb = (StringBuilder) data;
-    sb.append(findMethod(node.value.toString()).invoke(environment.getMethodType())).append("( ");
-    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-      Node child = node.jjtGetChild(i);
-      if (i > 0) sb.append(',');
-      child.jjtAccept(this, sb);
-    }
-    sb.append(" )");
+    sb.append(findMethod(node.value.toString()).invoke(environment.getMethodType())).append("(");
+    visitChildren(node, sb);
+    sb.append(")");
     return sb;
   }
 
   @Override
   public Object visit(ASTsubsetCall node, Object data) {
     StringBuilder sb = (StringBuilder) data;
-    sb.append(node.value).append("[ ");
-    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-      Node child = node.jjtGetChild(i);
-      if (i > 0) sb.append(',');
-      child.jjtAccept(this, sb);
-    }
-    sb.append(" ]");
+    sb.append(node.value).append("[");
+    visitChildren(node, sb);
+    sb.append("]");
     return sb;
   }
 
   @Override
   public Object visit(ASTBinaryOp node, Object data) {
     StringBuilder sb = (StringBuilder) data;
-    if ("=".equals(node.value))
-      sb.append(node.value);
-    else
+    if ("=".equals(node.value) && (node.jjtGetParent() instanceof ASTfuncCall)) {
+      node.jjtGetChild(0).jjtAccept(this, sb);
+      sb.append(" = ");
+      node.jjtGetChild(1).jjtAccept(this, sb);
+    } else {
       sb.append("base::'").append(node.value).append("'");
-    sb.append("( ");
-    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-      Node child = node.jjtGetChild(i);
-      if (i > 0) sb.append(',');
-      child.jjtAccept(this, sb);
+      sb.append("(");
+      visitChildren(node, sb);
+      sb.append(")");
     }
-    sb.append(" )");
     return sb;
   }
 
@@ -97,6 +88,14 @@ public class RScriptGenerator implements DataShieldGrammarVisitor {
   @Override
   public Object visit(SimpleNode node, Object data) {
     return node.childrenAccept(this, data);
+  }
+
+  private void visitChildren(Node node, StringBuilder sb) {
+    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+      Node child = node.jjtGetChild(i);
+      if (i > 0) sb.append(", ");
+      child.jjtAccept(this, sb);
+    }
   }
 
   private DSMethod findMethod(String name) {
