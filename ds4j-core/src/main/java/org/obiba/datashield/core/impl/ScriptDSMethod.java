@@ -9,6 +9,7 @@
  */
 package org.obiba.datashield.core.impl;
 
+import java.util.Objects;
 import org.obiba.datashield.core.DSMethod;
 import org.obiba.datashield.core.DSMethodType;
 
@@ -44,4 +45,21 @@ public class ScriptDSMethod implements DSMethod {
     return env.symbol() + "$" + getName();
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ScriptDSMethod that = (ScriptDSMethod) o;
+    return Objects.equals(name, that.name) &&
+        Objects.equals(script, that.script);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, script);
+  }
 }

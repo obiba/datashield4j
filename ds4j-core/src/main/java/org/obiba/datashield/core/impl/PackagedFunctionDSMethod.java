@@ -9,6 +9,7 @@
  */
 package org.obiba.datashield.core.impl;
 
+import java.util.Objects;
 import org.obiba.datashield.core.DSMethod;
 import org.obiba.datashield.core.DSMethodType;
 
@@ -86,5 +87,25 @@ public class PackagedFunctionDSMethod implements DSMethod {
   @Override
   public String invoke(DSMethodType env) {
     return getFunction();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    PackagedFunctionDSMethod that = (PackagedFunctionDSMethod) o;
+    return Objects.equals(name, that.name) &&
+        Objects.equals(function, that.function) &&
+        Objects.equals(pack, that.pack) &&
+        Objects.equals(version, that.version);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, function, pack, version);
   }
 }
