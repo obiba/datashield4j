@@ -31,8 +31,7 @@ SKIP:
 
 TOKEN : /* Numeric Constants */
 {
-       < NUMBER: ("-")? <FLOAT> ( ["e","E"] ([ "-","+"])? <FLOAT> )?
-       >
+       < NUMBER: ("-")? <FLOAT> ( ["e","E"] ([ "-","+"])? ( <DIGIT> )+ )? >
  |     < RANGE: ( <DIGIT> )+ ":" ( <DIGIT> )+ >
  |     < #FLOAT: <INTEGER>
            | <INTEGER> ( "." <INTEGER> )?
@@ -45,8 +44,8 @@ TOKEN : /* Numeric Constants */
 TOKEN:
 {
       < R_IDENTIFIER: ( <LETTER> )+ ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOLLAR> | <DOT> | <MINUS> )* >
-  |   < R_STRING: ( <QUOTE> ) ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOT> | <MINUS> | <SEPARATOR> | <DOLLAR> | <BRACKET> )+ ( <QUOTE> ) >
-  |   < R_DBLSTRING: ( <DOUBLEQUOTE> ) ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOT> | <MINUS> | <SEPARATOR> | <DOLLAR> | <BRACKET> )+ ( <DOUBLEQUOTE> ) >
+  |   < R_STRING: ( <QUOTE> ) ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOT> | <PLUS> | <MINUS> | <SEPARATOR> | <DOLLAR> | <BRACKET> )+ ( <QUOTE> ) >
+  |   < R_DBLSTRING: ( <DOUBLEQUOTE> ) ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOT> | <PLUS> | <MINUS> | <SEPARATOR> | <DOLLAR> | <BRACKET> )+ ( <DOUBLEQUOTE> ) >
   |   < R_OPERATOR: (["/", "!", "="]) | "%*%">
   |   < F_OPERATOR: ([":"] | "%in%") >
   |   < COMMON_OPERATOR: (["+","-","*", "^"]) >
@@ -57,6 +56,7 @@ TOKEN:
   |   < #SEPARATOR: [";",":",",","_","."]>
   |   < #BRACKET: ["[", "]"] >
   |   < #DOLLAR: "$">
+  |   < #PLUS: "+">
   |   < #MINUS: "-">
   |   < #DOT: ".">
   |   < #QUOTE: "'">
