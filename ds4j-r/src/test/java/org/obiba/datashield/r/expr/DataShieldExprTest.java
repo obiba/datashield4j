@@ -37,6 +37,38 @@ public class DataShieldExprTest {
       new TestCase("A negative number, small, exponential notation, French style", "-1.0E-03"),
       new TestCase("A negative number, large, exponential notation, French style [1]", "-1.0E+03"),
       new TestCase("A negative number, large, exponential notation, French style [2]", "-1.0E3"),
+      new TestCase("A symbol, in single quote", "'A'"),
+      new TestCase("A number, in single quote", "'1.0'"),
+      new TestCase("A number, small, exponential notation, US style, in single quote", "'1.0e-03'"),
+      new TestCase("A number, large, exponential notation, US style, in single quote [1]", "'1.0e+03'"),
+      new TestCase("A number, large, exponential notation, US style, in single quote [2]", "'1.0e3'"),
+      new TestCase("A number, small, exponential notation, French style, in single quote", "'1.0E-03'"),
+      new TestCase("A number, large, exponential notation, French style, in single quote [1]", "'1.0E+03'"),
+      new TestCase("A number, large, exponential notation, French style, in single quote [2]", "'1.0E3'"),
+      new TestCase("An integer, in single quote", "'5L'"),
+      new TestCase("A negative number, in single quote", "'-0.43151402098822'"),
+      new TestCase("A negative number, small, exponential notation, US style, in single quote", "'-1.0e-03'"),
+      new TestCase("A negative number, large, exponential notation, US style, in single quote [1]", "'-1.0e+03'"),
+      new TestCase("A negative number, large, exponential notation, US style, in single quote [2]", "'-1.0e3'"),
+      new TestCase("A negative number, small, exponential notation, French style, in single quote", "'-1.0E-03'"),
+      new TestCase("A negative number, large, exponential notation, French style, in single quote [1]", "'-1.0E+03'"),
+      new TestCase("A negative number, large, exponential notation, French style, in single quote [2]", "'-1.0E3'"),
+      new TestCase("A symbol, in double quote", "\"A\""),
+      new TestCase("A number, in double quote", "\"1.0\""),
+      new TestCase("A number, small, exponential notation, US style, in double quote", "\"1.0e-03\""),
+      new TestCase("A number, large, exponential notation, US style, in double quote [1]", "\"1.0e+03\""),
+      new TestCase("A number, large, exponential notation, US style, in double quote [2]", "\"1.0e3\""),
+      new TestCase("A number, small, exponential notation, French style, in double quote", "\"1.0E-03\""),
+      new TestCase("A number, large, exponential notation, French style, in double quote [1]", "\"1.0E+03\""),
+      new TestCase("A number, large, exponential notation, French style, in double quote [2]", "\"1.0E3\""),
+      new TestCase("An integer, in double quote", "\"5L\""),
+      new TestCase("A negative number, in double quote", "\"-0.43151402098822\""),
+      new TestCase("A negative number, small, exponential notation, US style, in double quote", "\"-1.0e-03\""),
+      new TestCase("A negative number, large, exponential notation, US style, in double quote [1]", "\"-1.0e+03\""),
+      new TestCase("A negative number, large, exponential notation, US style, in double quote [2]", "\"-1.0e3\""),
+      new TestCase("A negative number, small, exponential notation, French style, in double quote", "\"-1.0E-03\""),
+      new TestCase("A negative number, large, exponential notation, French style, in double quote [1]", "\"-1.0E+03\""),
+      new TestCase("A negative number, large, exponential notation, French style, in double quote [2]", "\"-1.0E3\""),
       new TestCase("An embedded symbol", "A$B$C.D"),
       new TestCase("A subset symbol", "A[2, 1]"),
       new TestCase("A subset symbol with range", "A[2, 1:2]"),
@@ -101,7 +133,7 @@ public class DataShieldExprTest {
 
   @Test(expected = TokenMgrError.class)
   public void test_operatorInString() throws ParseException {
-    doTest("Function with operator in string argument", "A('this+that')");
+    doTest("Function with operator in string argument", "A('this*that')");
   }
 
   @Test(expected = TokenMgrError.class)
