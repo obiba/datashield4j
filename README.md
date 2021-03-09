@@ -32,7 +32,7 @@ What is currently NOT included (because it is too data repository specific):
 
 ## Usage
 
-Available in OBiBa's Maven repository: https://dl.bintray.com/obiba/maven
+Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-release-local/
 
 ```
   <dependency>
