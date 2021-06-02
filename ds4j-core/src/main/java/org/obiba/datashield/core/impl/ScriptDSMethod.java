@@ -41,6 +41,11 @@ public class ScriptDSMethod implements DSMethod {
   }
 
   @Override
+  public boolean hasPackage() {
+    return false;
+  }
+
+  @Override
   public String invoke(DSMethodType env) {
     return env.symbol() + "$" + getName();
   }

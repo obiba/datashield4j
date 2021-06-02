@@ -22,6 +22,13 @@ public interface DSMethod {
   String getName();
 
   /**
+   * Whether the method is defined in a package.
+   *
+   * @return
+   */
+  boolean hasPackage();
+
+  /**
    * Translation of the name (invoked by the client) into a server expression call.
    *
    * @param env

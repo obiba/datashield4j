@@ -13,9 +13,9 @@ public class DefaultDSEnvironment implements DSEnvironment {
 
   private DSMethodType type;
 
-  private List<DSMethod> methods;
+  private List<DefaultDSMethod> methods;
 
-  protected DefaultDSEnvironment() {
+  public DefaultDSEnvironment() {
     this(DSMethodType.AGGREGATE, null);
   }
 
@@ -23,7 +23,7 @@ public class DefaultDSEnvironment implements DSEnvironment {
     this(type, null);
   }
 
-  public DefaultDSEnvironment(DSMethodType type, List<DSMethod> methods) {
+  public DefaultDSEnvironment(DSMethodType type, List<DefaultDSMethod> methods) {
     this.type = type;
     this.methods = methods == null ? new ArrayList<>() : methods;
   }
@@ -50,7 +50,7 @@ public class DefaultDSEnvironment implements DSEnvironment {
         break;
       }
     }
-    methods.add(method);
+    methods.add((DefaultDSMethod) method);
   }
 
   @Override

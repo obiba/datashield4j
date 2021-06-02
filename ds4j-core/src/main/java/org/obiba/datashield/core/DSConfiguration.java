@@ -9,6 +9,7 @@
  */
 package org.obiba.datashield.core;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -54,6 +55,19 @@ public interface DSConfiguration {
    * @throws NoSuchElementException
    */
   DSOption getOption(String name) throws NoSuchElementException;
+
+  /**
+   * Add or update methods for the type.
+   *
+   * @param type
+   * @param methods
+   */
+  default void addOrUpdateMethods(DSMethodType type, List<DSMethod> methods) {
+    DSEnvironment env = getEnvironment(type);
+    for (DSMethod method : methods) {
+      env.addOrUpdate(method);
+    }
+  }
 
   /**
    * Add or update an option.
