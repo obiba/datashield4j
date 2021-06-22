@@ -70,15 +70,6 @@ public class DataShieldExprTest {
       new TestCase("A negative number, large, exponential notation, French style, in double quote [1]", "\"-1.0E+03\""),
       new TestCase("A negative number, large, exponential notation, French style, in double quote [2]", "\"-1.0E3\""),
       new TestCase("An embedded symbol", "A$B$C.D"),
-      new TestCase("A subset symbol", "A[2, 1]"),
-      new TestCase("A subset symbol with range", "A[2, 1:2]"),
-      //new TestCase("An open row subset symbol", "A[,1]"),
-      //new TestCase("An open column subset symbol", "A[1,]"),
-      //new TestCase("A subset symbol with range", "A[,1:2]"),
-      //new TestCase("A subset symbol with function call", "D[,func(D[,1])]", "D[,dsBase::func(D[, 1])]"),
-      new TestCase("An empty subset symbol", "A[]"),
-      //new TestCase("An almost empty subset symbol", "A[,]"),
-      //new TestCase("A subset value symbol", "A[[1]]"),
       new TestCase("A formula", "A ~ B", "A~B"),
       new TestCase("A function invocation", "A()", "dsBase::A()"),
       new TestCase("An operator on symbols", "A + B", "base::'+'(A, B)"),
@@ -87,8 +78,6 @@ public class DataShieldExprTest {
       new TestCase("A formula with operators", "A ~ B + (C * D)^4 : E %in% F", "A~B+(C*D)^4:E%in%F"),
       new TestCase("Grouping", "(A + B) * (C - D)", "base::'*'(base::'+'(A, B), base::'-'(C, D))"),
       new TestCase("Function with a single parameter", "A(B)", "dsBase::A(B)"),
-      new TestCase("Function with a subset parameter", "A(B[,2])", "dsBase::A(B[2])"),
-      new TestCase("Function with a subset parameter and a simple parameter", "A(B[,2], C)", "dsBase::A(B[2], C)"),
       new TestCase("Function with a function invocation as parameter", "A(B())", "dsBase::A(dsBase::B())"),
       new TestCase("Function with multiple parameters", "A(B, C)", "dsBase::A(B, C)"),
       new TestCase("Function with multiple kinds of parameters", "A(B, C(), D, E(F(G/H)), A + B * C())", "dsBase::A(B, dsBase::C(), D, dsBase::E(dsBase::F(base::'/'(G, H))), base::'+'(A, base::'*'(B, dsBase::C())))"),
@@ -101,8 +90,7 @@ public class DataShieldExprTest {
       new TestCase("Function with a list of colon separated numerical string argument", "A('1.2:1.3:-8.5')", "dsBase::A('1.2:1.3:-8.5')"),
       new TestCase("Function with a list of comma separated numerical string argument", "A('1.2,1.3,-8.5')", "dsBase::A('1.2,1.3,-8.5')"),
       new TestCase("Function with a list of semi colon separated numerical string argument", "A('1.2;1.3;-8.5')", "dsBase::A('1.2;1.3;-8.5')"),
-      new TestCase("Function with data frame column name string argument", "A('D$abc')", "dsBase::A('D$abc')"),
-      new TestCase("Function with data frame index string argument", "A('D[123]')", "dsBase::A('D[123]')")};
+      new TestCase("Function with data frame column name string argument", "A('D$abc')", "dsBase::A('D$abc')")};
 
   @Test
   public void test_testCases() throws ParseException {
@@ -124,6 +112,76 @@ public class DataShieldExprTest {
   @Test(expected = TokenMgrError.class)
   public void test_slashInString() throws ParseException {
     doTest("Function with slash in string argument", "A('this/that')");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_openSquareBracketString() throws ParseException {
+    doTest("Function with opening square bracket in string argument", "A('this[that')");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_closeSquareBracketString() throws ParseException {
+    doTest("Function with closing square bracket in string argument", "A('this]that')");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_arraySquareBracketString() throws ParseException {
+    doTest("A subset symbol", "A[2, 1]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_arrayRangeSquareBracketString() throws ParseException {
+    doTest("A subset symbol with range", "A[2, 1:2]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_rowSubsetSquareBracketString() throws ParseException {
+    doTest("An open row subset symbol", "A[,1]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_openColumnSquareBracketString() throws ParseException {
+    doTest("An open column subset symbol", "A[1,]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_symbolRangeSquareBracketString() throws ParseException {
+    doTest("A subset symbol with range", "A[,1:2]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_functionAllSquareBracketString() throws ParseException {
+    doTest("A subset symbol with function call", "D[,func(D[,1])]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_emptySubsetSquareBracketString() throws ParseException {
+    doTest("An empty subset symbol", "A[]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_almostEmptySubsetSquareBracketString() throws ParseException {
+    doTest("An almost empty subset symbol", "A[,]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_subsetValueSquareBracketString() throws ParseException {
+    doTest("A subset value symbol", "A[[1]]");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_funcSubsetParamSquareBracketString() throws ParseException {
+    doTest("Function with a subset parameter", "A(B[,2])");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_funcSubsetAndSimplePAramSquareBracketString() throws ParseException {
+    doTest("Function with a subset parameter and a simple parameter", "A(B[,2], C)");
+  }
+
+  @Test(expected = TokenMgrError.class)
+  public void test_funcDataframeIndexSquareBracketString() throws ParseException {
+    doTest("Function with data frame index string argument", "A('D[123]')");
   }
 
   @Test(expected = TokenMgrError.class)
