@@ -11,7 +11,7 @@ options{
 }
 
 PARSER_BEGIN(DataShieldGrammar)
-package org.obiba.datashield.r.expr;
+package org.obiba.datashield.r.expr.v2;
 
 import java.io.*;
 import java.util.*;

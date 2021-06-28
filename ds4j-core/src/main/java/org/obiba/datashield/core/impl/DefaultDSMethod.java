@@ -21,7 +21,8 @@ public class DefaultDSMethod implements DSMethod {
    */
   private String version;
 
-  public DefaultDSMethod() {}
+  public DefaultDSMethod() {
+  }
 
   public DefaultDSMethod(String name, String function) {
     this.name = name;

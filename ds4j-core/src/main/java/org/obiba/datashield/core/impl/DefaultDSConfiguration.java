@@ -9,7 +9,10 @@
  */
 package org.obiba.datashield.core.impl;
 
-import org.obiba.datashield.core.*;
+import org.obiba.datashield.core.DSConfiguration;
+import org.obiba.datashield.core.DSEnvironment;
+import org.obiba.datashield.core.DSMethodType;
+import org.obiba.datashield.core.DSOption;
 
 import java.util.*;
 import java.util.stream.Collectors;

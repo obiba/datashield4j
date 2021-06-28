@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 OBiBa. All rights reserved.
+ * Copyright (c) 2021 OBiBa. All rights reserved.
  *
  * This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0.
@@ -9,9 +9,10 @@
  */
 package org.obiba.datashield.core.impl;
 
-import java.util.Objects;
 import org.obiba.datashield.core.DSMethod;
 import org.obiba.datashield.core.DSMethodType;
+
+import java.util.Objects;
 
 /**
  * A DataSHIELD method defined by a script.
