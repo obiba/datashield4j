@@ -23,7 +23,7 @@ public class RScriptGeneratorFactory {
         throw new ParseException(e.getMessage(), e);
       }
     } else {
-      throw new ParseException("Unkown R parser version: " + rParserVersion);
+      throw new ParseException("Unknown R parser version: " + rParserVersion);
     }
   }
 }
