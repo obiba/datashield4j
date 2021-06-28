@@ -9,16 +9,26 @@
  */
 package org.obiba.datashield.core.impl;
 
-import org.obiba.datashield.core.*;
+import org.obiba.datashield.core.DSConfiguration;
+import org.obiba.datashield.core.DSEnvironment;
+import org.obiba.datashield.core.DSMethodType;
+import org.obiba.datashield.core.DSOption;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class DefaultDSConfiguration implements DSConfiguration {
 
+  private String rParserVersion;
+
   private List<DSEnvironment> environments = new ArrayList<>();
 
   private final Map<String, String> options = new HashMap<>();
+
+  @Override
+  public String getRParserVersion() {
+    return rParserVersion == null ? "v1" : rParserVersion;
+  }
 
   @Override
   public synchronized DSEnvironment getEnvironment(DSMethodType type) {

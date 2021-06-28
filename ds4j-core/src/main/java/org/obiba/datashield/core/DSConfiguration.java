@@ -18,6 +18,13 @@ import java.util.NoSuchElementException;
 public interface DSConfiguration {
 
   /**
+   * Get the R parser version that applies.
+   *
+   * @return
+   */
+  String getRParserVersion();
+
+  /**
    * Get the configured methods for the provided type.
    *
    * @param type
