@@ -19,9 +19,16 @@ import java.util.stream.Collectors;
 
 public class DefaultDSConfiguration implements DSConfiguration {
 
+  private String rParserVersion;
+
   private List<DSEnvironment> environments = new ArrayList<>();
 
   private final Map<String, String> options = new HashMap<>();
+
+  @Override
+  public String getRParserVersion() {
+    return rParserVersion == null ? "v1" : rParserVersion;
+  }
 
   @Override
   public synchronized DSEnvironment getEnvironment(DSMethodType type) {

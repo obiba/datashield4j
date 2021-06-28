@@ -7,13 +7,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.obiba.datashield.r.expr;
+package org.obiba.datashield.r.expr.v2;
 
-import org.obiba.datashield.r.expr.v2.ASTfuncCall;
-import org.obiba.datashield.r.expr.v2.ASTroot;
-import org.obiba.datashield.r.expr.v2.DSRScriptValidator;
+import org.obiba.datashield.r.expr.InvalidScriptException;
 
-public class FirstNodeInvokesFunctionValidator extends DSRScriptValidator {
+class FirstNodeInvokesFunctionValidator extends DSRScriptValidator {
 
   @Override
   public Object visit(ASTroot node, Object data) {

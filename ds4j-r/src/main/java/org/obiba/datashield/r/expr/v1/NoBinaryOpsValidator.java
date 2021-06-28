@@ -7,12 +7,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.obiba.datashield.r.expr;
+package org.obiba.datashield.r.expr.v1;
 
-import org.obiba.datashield.r.expr.v2.ASTBinaryOp;
-import org.obiba.datashield.r.expr.v2.DSRScriptValidator;
+import org.obiba.datashield.r.expr.InvalidScriptException;
 
-public class NoBinaryOpsValidator extends DSRScriptValidator {
+class NoBinaryOpsValidator extends DSRScriptValidator {
 
   @Override
   public Object visit(ASTBinaryOp node, Object data) {

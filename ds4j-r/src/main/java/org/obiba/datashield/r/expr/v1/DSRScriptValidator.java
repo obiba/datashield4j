@@ -14,7 +14,7 @@ import org.obiba.datashield.r.expr.InvalidScriptException;
 
 import java.util.Arrays;
 
-public class DSRScriptValidator implements DataShieldGrammarVisitor {
+class DSRScriptValidator implements DataShieldGrammarVisitor {
 
   public DSRScriptValidator() {
   }

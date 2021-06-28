@@ -15,7 +15,6 @@ import org.obiba.datashield.core.DSEnvironment;
 import org.obiba.datashield.core.DSMethod;
 import org.obiba.datashield.core.impl.DefaultDSEnvironment;
 import org.obiba.datashield.core.impl.PackagedFunctionDSMethod;
-import org.obiba.datashield.r.expr.v1.RScriptGenerator;
 
 import java.io.StringReader;
 
@@ -181,9 +180,8 @@ public class DataShieldExprTest {
         return new PackagedFunctionDSMethod(name, "dsBase::" + name);
       }
     };
-    RScriptGenerator visitor = new RScriptGenerator(environment);
-    DataShieldGrammar g = new DataShieldGrammar(new StringReader(test));
-    String script = visitor.toScript(g.root());
+    RScriptGeneratorV1 visitor = new RScriptGeneratorV1(environment, test);
+    String script = visitor.toScript();
     Assert.assertEquals(expected, script);
   }
 

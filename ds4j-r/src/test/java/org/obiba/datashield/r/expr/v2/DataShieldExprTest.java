@@ -238,9 +238,8 @@ public class DataShieldExprTest {
         return new PackagedFunctionDSMethod(name, "dsBase::" + name);
       }
     };
-    RScriptGenerator visitor = new RScriptGenerator(environment);
-    DataShieldGrammar g = new DataShieldGrammar(new StringReader(test));
-    String script = visitor.toScript(g.root());
+    RScriptGeneratorV2 visitor = new RScriptGeneratorV2(environment, test);
+    String script = visitor.toScript();
     Assert.assertEquals(expected, script);
   }
 
