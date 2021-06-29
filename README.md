@@ -28,7 +28,7 @@ data and to apply the DataSHIELD configuration before forwarding the request to 
 
 The R parser comes with several versions (which R parser version to be used must be specified):
 
-* `v1` (since ds4j 1.0.0), is the original R parser more permissive.
+* `v1` (since ds4j 1.0.0), is the original R parser, more permissive.
 * `v2` (since ds4j 2.0.0), is the most recent R parser, more restrictive regarding the R subset syntax (square brackets are not allowed).
 
 The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
