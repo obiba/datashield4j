@@ -22,7 +22,18 @@ These classes are not bound to a specific implementation language, despite only 
 
 ## DataSHIELD R
 
-When a DataSHIELD request is received, it must be parsed to identify and resolve the function calls and the allowed language elements. This package provides a R parser, based on a subset of the R language. This parser is to be used to secure the access to the data and to apply the DataSHIELD configuration before forwarding the request to the R server session.
+Each DataSHIELD request must be parsed to identify and resolve the function calls and the allowed language elements. This 
+package provides an R parser, based on a subset of the R language. This parser is to be used to secure the access to the 
+data and to apply the DataSHIELD configuration before forwarding the request to the R server session.
+
+The R parser comes with several versions (which R parser version to be used must be specified):
+
+* `v1` (since ds4j 1.0.0), is the original R parser more permissive.
+* `v2` (since ds4j 2.0.0), is the most recent R parser, more restrictive regarding the R subset syntax (square brackets are not allowed).
+
+The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
+that will validate the submitted R code and will rewrite the function calls according to the DataSHIELD configuration
+(aggregate and assign function name mapping).
 
 What is currently NOT included (because it is too data repository specific):
 
