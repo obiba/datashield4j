@@ -297,7 +297,7 @@
     <connection>scm:git:https://github.com/obiba/datashield4j.git</connection>
     <developerConnection>scm:git:https://github.com/obiba/datashield4j.git</developerConnection>
     <url>https://github.com/obiba/datashield4j</url>
-    <tag>HEAD</tag>
+    <tag>ds4j-2.0.x</tag>
   </scm>
 
   <issueManagement>
