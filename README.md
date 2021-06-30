@@ -33,10 +33,6 @@ The R parser comes with several versions (which R parser version to be used must
 | `v1` |  The original R parser (since ds4j 1.0.0), used until [Opal](https://github.com/obiba/opal) 4.1. |
 | `v2` |  The most recent R parser (since ds4j 2.0.0), more restrictive regarding the R subset syntax (square brackets are not allowed). Default R parser since [Opal](https://github.com/obiba/opal) 4.2. |
 
-The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
-that will validate the submitted R code and will rewrite the function calls according to the DataSHIELD configuration
-(aggregate and assign function name mapping).
-
 What is currently NOT included (because it is too data repository specific):
 
 * R server session management
@@ -66,7 +62,11 @@ Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-r
 
 You can use the helper classes to define your `DSConfiguration` and store it in a file or a database. 
 
-Then use this configuration when receiving a R script request. Example code:
+The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
+that will validate the submitted R code and will rewrite the function calls according to the DataSHIELD configuration
+(aggregate and assign function name mapping).
+
+Then use the `DSConfiguration` when receiving a R script request. Example code:
 
 ```java
 // * rParserVersion: one of v1 (legacy) or v2 (recommended)
