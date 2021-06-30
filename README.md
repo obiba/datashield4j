@@ -4,11 +4,11 @@
 
 DataSHIELD core classes for implementing the DataSHIELD platform in a data repository.
 
-Reference implementation is [Opal](https://github.com/obiba/opal).
+Reference implementation is [Opal](https://www.obiba.org/pages/products/opal/).
 
-Learn more about [DataSHIELD](http://www.datashield.ac.uk/).
+Learn more about [DataSHIELD](https://www.datashield.org/).
 
-See also [DataSHIELD Interface (DSI)](https://github.com/datashield/DSI) for identifying the web services needed to implement the DataSHIELD platform.
+See also [DataSHIELD Interface (DSI)](https://datashield.github.io/DSI/) for identifying the web services needed to implement the DataSHIELD platform.
 
 ## DataSHIELD Core
 
@@ -28,8 +28,10 @@ data and to apply the DataSHIELD configuration before forwarding the request to 
 
 The R parser comes with several versions (which R parser version to be used must be specified):
 
-* `v1` (since ds4j 1.0.0), is the original R parser, more permissive.
-* `v2` (since ds4j 2.0.0), is the most recent R parser, more restrictive regarding the R subset syntax (square brackets are not allowed).
+| Parser Version | Description |
+| -------------- | ----------- |
+| `v1` |  The original R parser (since ds4j 1.0.0), used until [Opal](https://github.com/obiba/opal) 4.1. |
+| `v2` |  The most recent R parser (since ds4j 2.0.0), more restrictive regarding the R subset syntax (square brackets are not allowed). Default R parser since [Opal](https://github.com/obiba/opal) 4.2. |
 
 The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
 that will validate the submitted R code and will rewrite the function calls according to the DataSHIELD configuration
@@ -43,9 +45,11 @@ What is currently NOT included (because it is too data repository specific):
 
 ## Usage
 
+### Maven
+
 Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-release-local/
 
-```
+```xml
   <dependency>
     <groupId>org.obiba.datashield</groupId>
     <artifactId>ds4j-core</artifactId>
@@ -56,4 +60,21 @@ Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-r
     <artifactId>ds4j-r</artifactId>
     <version>${ds4j.version}</version>
   </dependency>
+```
+
+### Java
+
+You can use the helper classes to define your `DSConfiguration` and store it in a file or a database. 
+
+Then use this configuration when receiving a R script request. Example code:
+
+```java
+// * rParserVersion: one of v1 (legacy) or v2 (recommended)
+// * dsEnvironment: a DSEnvironment object that defines the allowed function calls
+//   and the mapping of these functions to internal ones
+// * script: the submitted R script
+RScriptGenerator rScriptGenerator = RScriptGeneratorFactory.make(rParserVersion, dsEnvironment, script);
+
+// script was validated, rewrite it with internal functions
+String scriptToExec = rScriptGenerator.toScript();
 ```
