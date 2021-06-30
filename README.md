@@ -70,10 +70,11 @@ Then use the `DSConfiguration` when receiving a R script request. Example code:
 
 ```java
 // * rParserVersion: one of v1 (legacy) or v2 (recommended)
-// * dsEnvironment: a DSEnvironment object that defines the allowed function calls
-//   and the mapping of these functions to internal ones
+// * dsEnv: a DSEnvironment object that defines the allowed function calls
+//   and do the mapping of these functions to internal ones
 // * script: the submitted R script
-RScriptGenerator rScriptGenerator = RScriptGeneratorFactory.make(rParserVersion, dsEnvironment, script);
+DSEnvironment dsEnv = dsConfig.getEnvironment(DSMethodType.ASSIGN); // or DSMethodType.AGGREGATE
+RScriptGenerator rScriptGenerator = RScriptGeneratorFactory.make(rParserVersion, dsEnv, script);
 
 // script was validated, rewrite it with internal functions
 String scriptToExec = rScriptGenerator.toScript();
