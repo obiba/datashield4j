@@ -63,15 +63,16 @@ Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-r
 You can use the helper classes to define your `DSConfiguration` and store it in a file or a database. 
 
 The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
-that will validate the submitted R code and will rewrite the function calls according to the DataSHIELD configuration
-(aggregate and assign function name mapping).
+that makes a `RScriptGenerator` object. This object will validate the submitted R code and will rewrite the function calls 
+according to the DataSHIELD configuration (aggregate and assign function name mapping).
 
-Then use the `DSConfiguration` when receiving a R script request. Example code:
+When receiving an R script request, and using the `DSConfiguration`, follow this example code:
 
 ```java
-// * rParserVersion: one of v1 (legacy) or v2 (recommended)
+// * rParserVersion: one of "v1" (legacy) or "v2" (recommended)
+// * dsConfig: a DSConfiguration object
 // * dsEnv: a DSEnvironment object that defines the allowed function calls
-//   and do the mapping of these functions to internal ones
+//   and the mapping of these functions to internal ones
 // * script: the submitted R script
 DSEnvironment dsEnv = dsConfig.getEnvironment(DSMethodType.ASSIGN); // or DSMethodType.AGGREGATE
 RScriptGenerator rScriptGenerator = RScriptGeneratorFactory.make(rParserVersion, dsEnv, script);
