@@ -16,6 +16,8 @@ import org.obiba.datashield.core.DSMethodType;
 import org.obiba.datashield.r.expr.RScriptGenerator;
 
 import java.io.StringReader;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Generates RScript from a DataSHIELD script.
@@ -25,6 +27,8 @@ public class RScriptGeneratorV1 implements DataShieldGrammarVisitor, RScriptGene
   private final DSEnvironment environment;
 
   private final SimpleNode scriptAst;
+
+  private final Map<String, String> mappedFunctions = new LinkedHashMap<>();
 
   public RScriptGeneratorV1(DSEnvironment environment, String script) throws ParseException {
     this.environment = environment;
@@ -39,6 +43,11 @@ public class RScriptGeneratorV1 implements DataShieldGrammarVisitor, RScriptGene
     StringBuilder sb = new StringBuilder();
     scriptAst.jjtAccept(this, sb);
     return sb.toString();
+  }
+
+  @Override
+  public Map<String, String> getMappedFunctions() {
+    return mappedFunctions;
   }
 
   @Override
@@ -110,6 +119,8 @@ public class RScriptGeneratorV1 implements DataShieldGrammarVisitor, RScriptGene
   }
 
   private DSMethod findMethod(String name) {
-    return environment.getMethod(name);
+    DSMethod method = environment.getMethod(name);
+    mappedFunctions.put(name, method.invoke(environment.getMethodType()));
+    return method;
   }
 }

@@ -1,5 +1,7 @@
 package org.obiba.datashield.r.expr;
 
+import java.util.Map;
+
 /**
  * Validate syntax and grammar of the submitted script and rewrite script using the DataSHIELD configuration,
  * before execution in the R server.
@@ -12,5 +14,7 @@ public interface RScriptGenerator {
    * @return
    */
   String toScript();
+
+  Map<String, String> getMappedFunctions();
 
 }
