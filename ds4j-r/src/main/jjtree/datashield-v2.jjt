@@ -76,7 +76,7 @@ SimpleNode root() #root :
 void exp() #void :
 {Token op;}
 {
- (  LOOKAHEAD(2)
+ (  LOOKAHEAD(formulaTerm() "~")
     // Parse a formula as much as possible (A~B+C must not be parsed as (A~B) + C). This is why it comes first here.
     formula()
   | additiveExp() [ op=<R_OPERATOR> exp() {jjtThis.value=op.image;} #BinaryOp(2) ]
@@ -183,17 +183,9 @@ void string() :
 }
 
 void formula() #symbol :
-{Token t;
- StringBuilder ft;
- StringBuilder sb = new StringBuilder();}
+{StringBuilder lhs, rhs;}
 {
-  (
-    t=<R_IDENTIFIER> "~" {sb.append(t.image).append("~");}
-    (
-        ft=formulaTerm() {sb.append(ft);}
-    )
-    
-  ) {jjtThis.value = sb.toString();}
+  lhs=formulaTerm() "~" rhs=formulaTerm() {jjtThis.value = lhs.append("~").append(rhs).toString();}
 }
 
 StringBuilder formulaTerm() #void :
