@@ -13,8 +13,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.obiba.datashield.core.DSEnvironment;
 import org.obiba.datashield.core.DSMethod;
+import org.obiba.datashield.core.DSMethodType;
 import org.obiba.datashield.core.impl.DefaultDSEnvironment;
 import org.obiba.datashield.core.impl.PackagedFunctionDSMethod;
+import org.obiba.datashield.r.expr.InvalidScriptException;
 
 import java.io.StringReader;
 
@@ -77,6 +79,11 @@ public class DataShieldExprTest {
       //new TestCase("A subset symbol with range", "A[,1:2]"),
       //new TestCase("A subset symbol with function call", "D[,func(D[,1])]", "D[,dsBase::func(D[, 1])]"),
       new TestCase("An empty subset symbol", "A[]"),
+      new TestCase("A subtraction in a subset", "A[1 -2]", "A[base::'-'(1, 2)]"),
+      new TestCase("A subtraction of a symbol in a subset", "A[B -1]", "A[base::'-'(B, 1)]"),
+      new TestCase("A subtraction from a negative number in a subset", "A[-1 -2]", "A[base::'-'(-1, 2)]"),
+      new TestCase("A subtraction from a range in a subset", "D[1:2 -1]", "D[base::'-'(1:2, 1)]"),
+      new TestCase("Negative numbers in a subset", "A[1, -2]"),
       //new TestCase("An almost empty subset symbol", "A[,]"),
       //new TestCase("A subset value symbol", "A[[1]]"),
       new TestCase("A formula", "A ~ B", "A~B"),
@@ -127,6 +134,8 @@ public class DataShieldExprTest {
       new TestCase("A formula with a numeric range as response", "1:3^2 ~ A", "1:3^2~A"),
       new TestCase("A formula with a division", "A ~ B / C", "A~B/C"),
       new TestCase("A formula with a division as response", "A / 2 ~ B", "A/2~B"),
+      new TestCase("A formula with a matrix product", "A ~ B %*% C", "A~B%*%C"),
+      new TestCase("A formula with a matrix product as response", "A %*% B ~ C", "A%*%B~C"),
       new TestCase("A formula with a negative response", "-A ~ B", "-A~B"),
       new TestCase("A formula with a negative term", "A ~ -B", "A~-B"),
       new TestCase("A formula with a negative group", "A ~ -(B + C)", "A~-(B+C)"),
@@ -141,6 +150,7 @@ public class DataShieldExprTest {
       new TestCase("Function with multiple kinds of parameters", "A(B, C(), D, E(F(G/H)), A + B * C())", "dsBase::A(B, dsBase::C(), D, dsBase::E(dsBase::F(base::'/'(G, H))), base::'+'(A, base::'*'(B, dsBase::C())))"),
       new TestCase("Function with formula as argument", "glm(A ~ B + C:D, poisson)", "dsBase::glm(A~B+C:D, poisson)"),
       new TestCase("Function with named argument", "A(arg=x,another=y)", "dsBase::A(arg = x, another = y)"),
+      new TestCase("Function with a string as argument name", "A('arg'=x)", "dsBase::A('arg' = x)"),
       new TestCase("Function with string argument", "A('this')", "dsBase::A('this')"),
       new TestCase("Function with double quoted string argument", "A(\"this\")", "dsBase::A(\"this\")"),
       new TestCase("Function with numerical string argument", "A('123')", "dsBase::A('123')"),
@@ -218,9 +228,64 @@ public class DataShieldExprTest {
     doTest("R reads it as (-1):3", "-1:3");
   }
 
+  @Test(expected = ParseException.class)
+  public void test_formulaWithMinusBeforeTilde() throws ParseException {
+    doTest("R reads it as A minus a one-sided formula", "A-~B");
+  }
+
+  @Test
+  public void test_invalidArgumentNames() throws ParseException {
+    for (String script : new String[]{"A(a+b=c)", "A(a * b = c)", "A(x-y=1)", "A(-x = 1)", "A(1 = 2)", "A(D$x = 1)", "A(B() = 1)"}) {
+      try {
+        doTestVisitor(script, null);
+        Assert.fail("Expected an invalid script: " + script);
+      } catch (InvalidScriptException e) {
+        Assert.assertEquals("Invalid argument name.", e.getMessage());
+      }
+    }
+  }
+
+  @Test
+  public void test_parseErrorListsExpectedTokens() {
+    for (String script : new String[]{"A(x=)", "A(1,)", "()", "(", "~A", "*A", "1+)", "A + * B", "A(-)"}) {
+      try {
+        new DataShieldGrammar(new StringReader(script)).root();
+        Assert.fail("Expected a parse error: " + script);
+      } catch (ParseException e) {
+        Assert.assertTrue(script + ": " + e.getMessage(), e.getMessage().contains("<NUMBER>") && e.getMessage().contains("<R_IDENTIFIER>"));
+      }
+    }
+  }
+
+  @Test
+  public void test_aggregateAcceptedScripts() throws ParseException {
+    String[][] scripts = {
+        {"A(B, 1, 'c', -1)", "dsBase::A(B, 1, 'c', -1)"},
+        {"A(x = -1, y = B(z = 1:3))", "dsBase::A(x = -1, y = dsBase::B(z = 1:3))"},
+        {"A(B ~ C + D, poisson)", "dsBase::A(B~C+D, poisson)"},
+        {"A(B + C)", "dsBase::A(base::'+'(B, C))"},
+        {"A(-B)", "dsBase::A(base::'-'(B))"},
+        {"A(1:3-1)", "dsBase::A(base::'-'(1:3, 1))"},
+        {"A(x = B * 2)", "dsBase::A(x = base::'*'(B, 2))"},
+        {"A(B(C / 2))", "dsBase::A(dsBase::B(base::'/'(C, 2)))"}};
+    for (String[] script : scripts) {
+      Assert.assertEquals(script[1], aggregateScript(script[0]));
+    }
+  }
+
   @Test
   public void test_script() throws ParseException {
     //doTestVisitor("A[,1]", "A[,1]");
+  }
+
+  private String aggregateScript(String script) throws ParseException {
+    DSEnvironment environment = new DefaultDSEnvironment(DSMethodType.AGGREGATE, null) {
+      @Override
+      public DSMethod getMethod(String name) {
+        return new PackagedFunctionDSMethod(name, "dsBase::" + name);
+      }
+    };
+    return new RScriptGeneratorV1(environment, script).toScript();
   }
 
   private void doTest(String msg, String test) throws ParseException {

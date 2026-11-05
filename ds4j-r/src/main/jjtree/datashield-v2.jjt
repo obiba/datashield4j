@@ -112,13 +112,19 @@ void rangeExp() #void :
 }
 
 void unaryExp() #void :
-{Token op;}
+{}
 {
   // A negative number stays a literal, unless ^ binds tighter than its sign: -2^2 is -(2^2).
-  LOOKAHEAD({ getToken(1).kind == MINUS && getToken(2).kind == NUMBER && getToken(3).kind != POWER_OPERATOR })
-    negativeNumber()
-  | op=<MINUS> unaryExp() {jjtThis.value=op.image;} #BinaryOp(1)
+  LOOKAHEAD(<MINUS> <NUMBER> <POWER_OPERATOR>) negation()
+  | LOOKAHEAD(2) negativeNumber()
+  | negation()
   | powerExp()
+}
+
+void negation() #void :
+{Token op;}
+{
+  op=<MINUS> unaryExp() {jjtThis.value=op.image;} #BinaryOp(1)
 }
 
 void powerExp() #void :
@@ -203,7 +209,7 @@ StringBuilder formulaTerm() #void :
     | t=<RANGE> {sb = new StringBuilder(t.image);}
   )
   {sb.insert(0, sign);}
-    [ (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<DIV_OPERATOR> | t=<POWER_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
+    [ (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<DIV_OPERATOR> | t=<MATMUL_OPERATOR> | t=<POWER_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
   {return sb;}
 }
 
