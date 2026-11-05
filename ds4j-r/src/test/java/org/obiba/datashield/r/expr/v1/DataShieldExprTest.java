@@ -86,6 +86,39 @@ public class DataShieldExprTest {
       new TestCase("Operator on functions", "A() + B * C", "base::'+'(dsBase::A(), base::'*'(B, C))"),
       new TestCase("A formula with operators", "A ~ B + (C * D)^4 : E %in% F", "A~B+(C*D)^4:E%in%F"),
       new TestCase("Grouping", "(A + B) * (C - D)", "base::'*'(base::'+'(A, B), base::'-'(C, D))"),
+      new TestCase("Multiplication before addition", "A * B + C", "base::'+'(base::'*'(A, B), C)"),
+      new TestCase("Division before subtraction", "A / B - C", "base::'-'(base::'/'(A, B), C)"),
+      new TestCase("Matrix product before multiplication", "A * B %*% C", "base::'*'(A, base::'%*%'(B, C))"),
+      new TestCase("Power before multiplication", "A * B ^ C", "base::'*'(A, base::'^'(B, C))"),
+      new TestCase("Subtraction is left associative", "A - B + 1", "base::'+'(base::'-'(A, B), 1)"),
+      new TestCase("Subtraction chain", "A - B - C", "base::'-'(base::'-'(A, B), C)"),
+      new TestCase("Division is left associative", "A / B * C", "base::'*'(base::'/'(A, B), C)"),
+      new TestCase("Power is right associative", "A ^ B ^ C", "base::'^'(A, base::'^'(B, C))"),
+      new TestCase("Grouping overrides associativity", "A - (B + 1)", "base::'-'(A, base::'+'(B, 1))"),
+      new TestCase("Operators in a function argument", "A(B - C + 1)", "dsBase::A(base::'+'(base::'-'(B, C), 1))"),
+      new TestCase("Operators in a named argument", "A(x = B * C + 1)", "dsBase::A(x = base::'+'(base::'*'(B, C), 1))"),
+      new TestCase("Subtraction without spaces", "A*B-C", "base::'-'(base::'*'(A, B), C)"),
+      new TestCase("Subtraction of columns without spaces", "D$A-D$B*2", "base::'-'(D$A, base::'*'(D$B, 2))"),
+      new TestCase("Subtraction of a group without spaces", "A-(B)", "base::'-'(A, B)"),
+      new TestCase("Subtraction of a number without spaces", "1-1", "base::'-'(1, 1)"),
+      new TestCase("Subtraction of a number with a space", "A -1", "base::'-'(A, 1)"),
+      new TestCase("Unary minus on a symbol", "-A", "base::'-'(A)"),
+      new TestCase("Unary minus on a group", "-(A + B)", "base::'-'(base::'+'(A, B))"),
+      new TestCase("Unary minus on a function", "-A()", "base::'-'(dsBase::A())"),
+      new TestCase("Unary minus binds tighter than multiplication", "-A * B", "base::'*'(base::'-'(A), B)"),
+      new TestCase("Unary minus after a binary operator", "A * -B", "base::'*'(A, base::'-'(B))"),
+      new TestCase("Power binds tighter than unary minus", "-A ^ 2", "base::'-'(base::'^'(A, 2))"),
+      new TestCase("Power binds tighter than the sign of a number", "-2 ^ 2", "base::'-'(base::'^'(2, 2))"),
+      new TestCase("Negative exponent", "2 ^ -1", "base::'^'(2, -1)"),
+      new TestCase("Negative number as an argument", "A(-1, x = -2.5)", "dsBase::A(-1, x = -2.5)"),
+      new TestCase("A range", "1:3"),
+      new TestCase("A range as an argument", "A(1:3)", "dsBase::A(1:3)"),
+      new TestCase("A range as an operand", "2 * 1:3", "base::'*'(2, 1:3)"),
+      new TestCase("A grouped range as an operand of power", "(1:3) ^ 2", "base::'^'(1:3, 2)"),
+      new TestCase("A formula with a negative intercept", "A ~ -1 + B", "A~-1+B"),
+      new TestCase("A formula removing the intercept", "A ~ B - 1", "A~B-1"),
+      new TestCase("A formula removing the intercept, without spaces", "A~B-1", "A~B-1"),
+      new TestCase("A formula with a negative term", "A ~ B -1", "A~B-1"),
       new TestCase("Function with a single parameter", "A(B)", "dsBase::A(B)"),
       new TestCase("Function with a subset parameter", "A(B[,2])", "dsBase::A(B[2])"),
       new TestCase("Function with a subset parameter and a simple parameter", "A(B[,2], C)", "dsBase::A(B[2], C)"),
@@ -154,6 +187,21 @@ public class DataShieldExprTest {
   @Test(expected = TokenMgrError.class)
   public void test_mixedQuoteInString2() throws ParseException {
     doTest("Function with mixed quotes in string argument", "A(\"that')");
+  }
+
+  @Test(expected = ParseException.class)
+  public void test_rangeAsPowerBase() throws ParseException {
+    doTest("R reads it as 1:(3^2)", "1:3^2");
+  }
+
+  @Test(expected = ParseException.class)
+  public void test_rangeAsPowerExponent() throws ParseException {
+    doTest("R reads it as (2^1):3", "2^1:3");
+  }
+
+  @Test(expected = ParseException.class)
+  public void test_negativeRange() throws ParseException {
+    doTest("R reads it as (-1):3", "-1:3");
   }
 
   @Test
