@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - snapshot
+      - 'ds4j-*.x'
+    tags:
+      - '*'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # a JDK 25 failure must not cancel the JDK 21 leg, which is the one that deploys
+      fail-fast: false
+      matrix:
+        java-version: [21, 25]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v6
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: temurin
+          cache: maven
+
+      - name: Set up Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cp .settings.xml ~/.m2/settings.xml
+
+      - name: Deploy Snapshot
+        if: matrix.java-version == 21 && github.ref == 'refs/heads/snapshot'
+        run: mvn -U -B deploy
+        env:
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PWD }}
+
+      - name: Deploy Release
+        if: matrix.java-version == 21 && startsWith(github.ref, 'refs/tags/')
+        run: mvn -B deploy
+        env:
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PWD: ${{ secrets.ARTIFACTORY_PWD }}
+
+      - name: Maven Install (no deploy)
+        if: matrix.java-version != 21 || (github.ref != 'refs/heads/snapshot' && !startsWith(github.ref, 'refs/tags/'))
+        run: mvn -U -B install

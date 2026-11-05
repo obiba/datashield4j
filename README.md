@@ -1,6 +1,6 @@
 # DataSHIELD4J
 
-[![Build Status](https://travis-ci.com/obiba/datashield4j.svg?branch=master)](https://travis-ci.com/obiba/datashield4j)
+[![CI](https://github.com/obiba/datashield4j/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/obiba/datashield4j/actions/workflows/ci.yml)
 
 DataSHIELD core classes for implementing the DataSHIELD platform in a data repository.
 
@@ -59,6 +59,8 @@ Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-r
 ```
 
 ### Java
+
+Java 21 or later is required.
 
 You can use the helper classes to define your `DSConfiguration` and store it in a file or a database. 
 
