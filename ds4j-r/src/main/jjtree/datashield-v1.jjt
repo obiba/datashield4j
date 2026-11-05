@@ -199,15 +199,18 @@ StringBuilder formulaTerm() #void :
 {
   Token t;
   StringBuilder sb,ft;
+  String sign = "";
 }
 {
+  ( <MINUS> {sign += "-";} )*
   (
       "(" sb=formulaTerm() ")"  {sb.insert(0, '(').append(')');}
     | t=<R_IDENTIFIER> {sb = new StringBuilder(t.image);}
     | t=<NUMBER> {sb = new StringBuilder(t.image);}
-    | <MINUS> t=<NUMBER> {sb = new StringBuilder("-").append(t.image);}
+    | t=<RANGE> {sb = new StringBuilder(t.image);}
   )
-    [ LOOKAHEAD(1) (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<POWER_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
+  {sb.insert(0, sign);}
+    [ LOOKAHEAD(1) (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<DIV_OPERATOR> | t=<POWER_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
   {return sb;}
 }
 
