@@ -1,6 +1,6 @@
 # DataSHIELD4J
 
-[![Build Status](https://travis-ci.com/obiba/datashield4j.svg?branch=master)](https://travis-ci.com/obiba/datashield4j)
+[![CI](https://github.com/obiba/datashield4j/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/obiba/datashield4j/actions/workflows/ci.yml)
 
 DataSHIELD core classes for implementing the DataSHIELD platform in a data repository.
 

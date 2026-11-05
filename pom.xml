@@ -306,8 +306,8 @@
   </issueManagement>
 
   <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.com/obiba/datashield4j</url>
+    <system>GitHub Actions</system>
+    <url>https://github.com/obiba/datashield4j/actions</url>
   </ciManagement>
 
   <mailingLists>
