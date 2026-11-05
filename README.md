@@ -60,6 +60,8 @@ Available in OBiBa's Maven repository: https://obiba.jfrog.io/artifactory/libs-r
 
 ### Java
 
+Java 21 or later is required.
+
 You can use the helper classes to define your `DSConfiguration` and store it in a file or a database. 
 
 The entry point class is the [RScriptGeneratorFactory](https://github.com/obiba/datashield4j/blob/master/ds4j-r/src/main/java/org/obiba/datashield/r/expr/RScriptGeneratorFactory.java)
