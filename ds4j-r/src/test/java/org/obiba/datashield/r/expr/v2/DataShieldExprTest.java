@@ -293,7 +293,7 @@ public class DataShieldExprTest {
 
   @Test
   public void test_rangeOperandsMustBeNumbers() throws ParseException {
-    for (String script : new String[]{"a:b", "1:n", "A(1:B())", "1:'3'", "-x:3", "1:(2 + x)"}) {
+    for (String script : new String[]{"a:b", "1:n", "A(1:B())", "1:'3'", "-x:3", "1:(2 + x)", "1:(1~x)", "1:(-a~b)", "1:((a)~b)", "1:(2=3)", "1:(2!3)"}) {
       try {
         doTestVisitor(script, null);
         Assert.fail("Expected an invalid script: " + script);

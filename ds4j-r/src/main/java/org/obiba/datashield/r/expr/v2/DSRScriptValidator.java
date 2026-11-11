@@ -13,6 +13,7 @@ package org.obiba.datashield.r.expr.v2;
 import org.obiba.datashield.r.expr.InvalidScriptException;
 
 import java.util.Arrays;
+import java.util.Set;
 
 class DSRScriptValidator implements DataShieldGrammarVisitor {
 
@@ -79,10 +80,14 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
     return "=".equals(node.jjtGetValue()) && node.jjtGetParent() instanceof ASTfuncCall;
   }
 
-  // A symbol is either a name, starting with a letter, or a number.
+  // Mirrors the NUMBER token, optionally negated: a symbol can also hold a name, a column (D$A) or a whole formula.
+  private static final String NUMBER = "-?([0-9]+L?(\\.[0-9]+L?)?|\\.[0-9]+L?)([eE][-+]?[0-9]+)?";
+
+  private static final Set<String> ARITHMETIC_OPERATORS = Set.of("+", "-", "*", "/", "^", "%*%", ":");
+
   private static boolean isNumeric(Node node) {
-    if (node instanceof ASTsymbol) return !((ASTsymbol) node).jjtGetValue().toString().matches("[a-zA-Z].*");
-    if (!(node instanceof ASTBinaryOp)) return false;
+    if (node instanceof ASTsymbol) return ((ASTsymbol) node).jjtGetValue().toString().matches(NUMBER);
+    if (!(node instanceof ASTBinaryOp) || !ARITHMETIC_OPERATORS.contains(((ASTBinaryOp) node).jjtGetValue())) return false;
     for (int i = 0; i < node.jjtGetNumChildren(); i++) {
       if (!isNumeric(node.jjtGetChild(i))) return false;
     }
