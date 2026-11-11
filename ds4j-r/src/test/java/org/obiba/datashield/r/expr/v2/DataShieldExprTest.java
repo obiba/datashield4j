@@ -327,6 +327,18 @@ public class DataShieldExprTest {
   }
 
   @Test
+  public void test_aggregateRejectedScripts() throws ParseException {
+    for (String script : new String[]{"A(x = D = 99)", "A(B + (D = 99))", "A(B(C = D = 1))"}) {
+      try {
+        aggregateScript(script);
+        Assert.fail("Expected an invalid script: " + script);
+      } catch (InvalidScriptException e) {
+        Assert.assertEquals("Assignments are not allowed.", e.getMessage());
+      }
+    }
+  }
+
+  @Test
   public void test_script() throws ParseException {
     //doTestVisitor("A[,1]", "A[,1]");
   }

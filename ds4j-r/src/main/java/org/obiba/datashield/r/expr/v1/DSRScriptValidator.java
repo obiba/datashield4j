@@ -76,7 +76,7 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
     return null;
   }
 
-  private static boolean isNamedArgument(ASTBinaryOp node) {
+  static boolean isNamedArgument(ASTBinaryOp node) {
     return "=".equals(node.jjtGetValue()) && node.jjtGetParent() instanceof ASTfuncCall;
   }
 

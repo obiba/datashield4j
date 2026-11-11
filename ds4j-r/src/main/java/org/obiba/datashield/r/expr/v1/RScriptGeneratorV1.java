@@ -33,7 +33,7 @@ public class RScriptGeneratorV1 implements DataShieldGrammarVisitor, RScriptGene
   public RScriptGeneratorV1(DSEnvironment environment, String script) throws ParseException {
     this.environment = environment;
     DSRScriptValidator validator = environment.getMethodType() != null && environment.getMethodType().equals(DSMethodType.AGGREGATE) ?
-        DSRScriptValidator.of(new FirstNodeInvokesFunctionValidator(), new DSRScriptValidator()) :
+        DSRScriptValidator.of(new FirstNodeInvokesFunctionValidator(), new NoAssignmentValidator()) :
         new DSRScriptValidator();
     this.scriptAst = new DataShieldGrammar(new StringReader(script)).root();
     validator.validate(scriptAst);
