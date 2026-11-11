@@ -13,8 +13,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.obiba.datashield.core.DSEnvironment;
 import org.obiba.datashield.core.DSMethod;
+import org.obiba.datashield.core.DSMethodType;
 import org.obiba.datashield.core.impl.DefaultDSEnvironment;
 import org.obiba.datashield.core.impl.PackagedFunctionDSMethod;
+import org.obiba.datashield.r.expr.InvalidScriptException;
 
 import java.io.StringReader;
 
@@ -77,12 +79,62 @@ public class DataShieldExprTest {
       new TestCase("Operator on functions", "A() + B * C", "base::'+'(dsBase::A(), base::'*'(B, C))"),
       new TestCase("A formula with operators", "A ~ B + (C * D)^4 : E %in% F", "A~B+(C*D)^4:E%in%F"),
       new TestCase("Grouping", "(A + B) * (C - D)", "base::'*'(base::'+'(A, B), base::'-'(C, D))"),
+      new TestCase("Multiplication before addition", "A * B + C", "base::'+'(base::'*'(A, B), C)"),
+      new TestCase("Division before subtraction", "A / B - C", "base::'-'(base::'/'(A, B), C)"),
+      new TestCase("Matrix product before multiplication", "A * B %*% C", "base::'*'(A, base::'%*%'(B, C))"),
+      new TestCase("Power before multiplication", "A * B ^ C", "base::'*'(A, base::'^'(B, C))"),
+      new TestCase("Subtraction is left associative", "A - B + 1", "base::'+'(base::'-'(A, B), 1)"),
+      new TestCase("Subtraction chain", "A - B - C", "base::'-'(base::'-'(A, B), C)"),
+      new TestCase("Division is left associative", "A / B * C", "base::'*'(base::'/'(A, B), C)"),
+      new TestCase("Power is right associative", "A ^ B ^ C", "base::'^'(A, base::'^'(B, C))"),
+      new TestCase("Grouping overrides associativity", "A - (B + 1)", "base::'-'(A, base::'+'(B, 1))"),
+      new TestCase("Operators in a function argument", "A(B - C + 1)", "dsBase::A(base::'+'(base::'-'(B, C), 1))"),
+      new TestCase("Operators in a named argument", "A(x = B * C + 1)", "dsBase::A(x = base::'+'(base::'*'(B, C), 1))"),
+      new TestCase("Subtraction without spaces", "A*B-C", "base::'-'(base::'*'(A, B), C)"),
+      new TestCase("Subtraction of columns without spaces", "D$A-D$B*2", "base::'-'(D$A, base::'*'(D$B, 2))"),
+      new TestCase("Subtraction of a group without spaces", "A-(B)", "base::'-'(A, B)"),
+      new TestCase("Subtraction of a number without spaces", "1-1", "base::'-'(1, 1)"),
+      new TestCase("Subtraction of a number with a space", "A -1", "base::'-'(A, 1)"),
+      new TestCase("Unary minus on a symbol", "-A", "base::'-'(A)"),
+      new TestCase("Unary minus on a group", "-(A + B)", "base::'-'(base::'+'(A, B))"),
+      new TestCase("Unary minus on a function", "-A()", "base::'-'(dsBase::A())"),
+      new TestCase("Unary minus binds tighter than multiplication", "-A * B", "base::'*'(base::'-'(A), B)"),
+      new TestCase("Unary minus after a binary operator", "A * -B", "base::'*'(A, base::'-'(B))"),
+      new TestCase("Power binds tighter than unary minus", "-A ^ 2", "base::'-'(base::'^'(A, 2))"),
+      new TestCase("Power binds tighter than the sign of a number", "-2 ^ 2", "base::'-'(base::'^'(2, 2))"),
+      new TestCase("Negative exponent", "2 ^ -1", "base::'^'(2, -1)"),
+      new TestCase("Negative number as an argument", "A(-1, x = -2.5)", "dsBase::A(-1, x = -2.5)"),
+      new TestCase("A range", "1:3"),
+      new TestCase("A range as an argument", "A(1:3)", "dsBase::A(1:3)"),
+      new TestCase("A range as an operand", "2 * 1:3", "base::'*'(2, 1:3)"),
+      new TestCase("A grouped range as an operand of power", "(1:3) ^ 2", "base::'^'(1:3, 2)"),
+      new TestCase("A formula with a negative intercept", "A ~ -1 + B", "A~-1+B"),
+      new TestCase("A formula removing the intercept", "A ~ B - 1", "A~B-1"),
+      new TestCase("A formula removing the intercept, without spaces", "A~B-1", "A~B-1"),
+      new TestCase("A formula with a negative term", "A ~ B -1", "A~B-1"),
+      new TestCase("A formula with an expression as response", "A-1~B", "A-1~B"),
+      new TestCase("A formula with spaces in the response", "A - 1 ~ B + C", "A-1~B+C"),
+      new TestCase("A formula with a grouped response", "(A + B) * 2 ~ C", "(A+B)*2~C"),
+      new TestCase("A formula with a sum as response is not an addition", "A + B ~ C", "A+B~C"),
+      new TestCase("A formula with a numeric range", "A ~ 2:3", "A~2:3"),
+      new TestCase("A formula with a numeric range as response", "1:3^2 ~ A", "1:3^2~A"),
+      new TestCase("A formula with a division", "A ~ B / C", "A~B/C"),
+      new TestCase("A formula with a division as response", "A / 2 ~ B", "A/2~B"),
+      new TestCase("A formula with a matrix product", "A ~ B %*% C", "A~B%*%C"),
+      new TestCase("A formula with a matrix product as response", "A %*% B ~ C", "A%*%B~C"),
+      new TestCase("A formula with a negative response", "-A ~ B", "-A~B"),
+      new TestCase("A formula with a negative term", "A ~ -B", "A~-B"),
+      new TestCase("A formula with a negative group", "A ~ -(B + C)", "A~-(B+C)"),
+      new TestCase("A formula with a term subtracting a negative", "A ~ B - -C", "A~B--C"),
+      new TestCase("A formula with an expression as response in a function", "glm(A-1 ~ B, poisson)", "dsBase::glm(A-1~B, poisson)"),
+      new TestCase("A formula with an expression as response as named argument", "A(f = B-1~C)", "dsBase::A(f = B-1~C)"),
       new TestCase("Function with a single parameter", "A(B)", "dsBase::A(B)"),
       new TestCase("Function with a function invocation as parameter", "A(B())", "dsBase::A(dsBase::B())"),
       new TestCase("Function with multiple parameters", "A(B, C)", "dsBase::A(B, C)"),
       new TestCase("Function with multiple kinds of parameters", "A(B, C(), D, E(F(G/H)), A + B * C())", "dsBase::A(B, dsBase::C(), D, dsBase::E(dsBase::F(base::'/'(G, H))), base::'+'(A, base::'*'(B, dsBase::C())))"),
       new TestCase("Function with formula as argument", "glm(A ~ B + C:D, poisson)", "dsBase::glm(A~B+C:D, poisson)"),
       new TestCase("Function with named argument", "A(arg=x,another=y)", "dsBase::A(arg = x, another = y)"),
+      new TestCase("Function with a string as argument name", "A('arg'=x)", "dsBase::A('arg' = x)"),
       new TestCase("Function with string argument", "A('this')", "dsBase::A('this')"),
       new TestCase("Function with double quoted string argument", "A(\"this\")", "dsBase::A(\"this\")"),
       new TestCase("Function with numerical string argument", "A('123')", "dsBase::A('123')"),
@@ -214,9 +266,79 @@ public class DataShieldExprTest {
     doTest("Function with mixed quotes in string argument", "A(\"that')");
   }
 
+  @Test(expected = ParseException.class)
+  public void test_rangeAsPowerBase() throws ParseException {
+    doTest("R reads it as 1:(3^2)", "1:3^2");
+  }
+
+  @Test(expected = ParseException.class)
+  public void test_rangeAsPowerExponent() throws ParseException {
+    doTest("R reads it as (2^1):3", "2^1:3");
+  }
+
+  @Test(expected = ParseException.class)
+  public void test_negativeRange() throws ParseException {
+    doTest("R reads it as (-1):3", "-1:3");
+  }
+
+  @Test(expected = ParseException.class)
+  public void test_formulaWithMinusBeforeTilde() throws ParseException {
+    doTest("R reads it as A minus a one-sided formula", "A-~B");
+  }
+
+  @Test
+  public void test_invalidArgumentNames() throws ParseException {
+    for (String script : new String[]{"A(a+b=c)", "A(a * b = c)", "A(x-y=1)", "A(-x = 1)", "A(1 = 2)", "A(D$x = 1)", "A(B() = 1)"}) {
+      try {
+        doTestVisitor(script, null);
+        Assert.fail("Expected an invalid script: " + script);
+      } catch (InvalidScriptException e) {
+        Assert.assertEquals("Invalid argument name.", e.getMessage());
+      }
+    }
+  }
+
+  @Test
+  public void test_parseErrorListsExpectedTokens() {
+    for (String script : new String[]{"A(x=)", "A(1,)", "()", "(", "~A", "*A", "1+)", "A + * B", "A(-)"}) {
+      try {
+        new DataShieldGrammar(new StringReader(script)).root();
+        Assert.fail("Expected a parse error: " + script);
+      } catch (ParseException e) {
+        Assert.assertTrue(script + ": " + e.getMessage(), e.getMessage().contains("<NUMBER>") && e.getMessage().contains("<R_IDENTIFIER>"));
+      }
+    }
+  }
+
+  @Test
+  public void test_aggregateAcceptedScripts() throws ParseException {
+    String[][] scripts = {
+        {"A(B, 1, 'c', -1)", "dsBase::A(B, 1, 'c', -1)"},
+        {"A(x = -1, y = B(z = 1:3))", "dsBase::A(x = -1, y = dsBase::B(z = 1:3))"},
+        {"A(B ~ C + D, poisson)", "dsBase::A(B~C+D, poisson)"},
+        {"A(B + C)", "dsBase::A(base::'+'(B, C))"},
+        {"A(-B)", "dsBase::A(base::'-'(B))"},
+        {"A(1:3-1)", "dsBase::A(base::'-'(1:3, 1))"},
+        {"A(x = B * 2)", "dsBase::A(x = base::'*'(B, 2))"},
+        {"A(B(C / 2))", "dsBase::A(dsBase::B(base::'/'(C, 2)))"}};
+    for (String[] script : scripts) {
+      Assert.assertEquals(script[1], aggregateScript(script[0]));
+    }
+  }
+
   @Test
   public void test_script() throws ParseException {
     //doTestVisitor("A[,1]", "A[,1]");
+  }
+
+  private String aggregateScript(String script) throws ParseException {
+    DSEnvironment environment = new DefaultDSEnvironment(DSMethodType.AGGREGATE, null) {
+      @Override
+      public DSMethod getMethod(String name) {
+        return new PackagedFunctionDSMethod(name, "dsBase::" + name);
+      }
+    };
+    return new RScriptGeneratorV2(environment, script).toScript();
   }
 
   private void doTest(String msg, String test) throws ParseException {

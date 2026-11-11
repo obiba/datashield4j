@@ -45,17 +45,20 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
 
   @Override
   public Object visit(ASTroot node, Object data) {
-    return null;
+    return node.childrenAccept(this, data);
   }
 
   @Override
   public Object visit(ASTBinaryOp node, Object data) {
-    return null;
+    if (isNamedArgument(node) && !isArgumentName(node.jjtGetChild(0))) {
+      throw new InvalidScriptException("Invalid argument name.");
+    }
+    return node.childrenAccept(this, data);
   }
 
   @Override
   public Object visit(ASTfuncCall node, Object data) {
-    return null;
+    return node.childrenAccept(this, data);
   }
 
   @Override
@@ -66,5 +69,15 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
   @Override
   public Object visit(ASTstring node, Object data) {
     return null;
+  }
+
+  private static boolean isNamedArgument(ASTBinaryOp node) {
+    return "=".equals(node.jjtGetValue()) && node.jjtGetParent() instanceof ASTfuncCall;
+  }
+
+  // R only accepts a name or a string there: a symbol node can also hold a number, a range or a column (D$A).
+  private static boolean isArgumentName(Node node) {
+    return node instanceof ASTstring
+        || node instanceof ASTsymbol && ((ASTsymbol) node).jjtGetValue().toString().matches("[a-zA-Z][\\w.]*");
   }
 }

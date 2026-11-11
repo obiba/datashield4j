@@ -31,7 +31,7 @@ SKIP:
 
 TOKEN : /* Numeric Constants */
 {
-       < NUMBER: ("-")? <FLOAT> ( ["e","E"] ([ "-","+"])? ( <DIGIT> )+ )? >
+       < NUMBER: <FLOAT> ( ["e","E"] ([ "-","+"])? ( <DIGIT> )+ )? >
  |     < RANGE: ( <DIGIT> )+ ":" ( <DIGIT> )+ >
  |     < #FLOAT: <INTEGER>
            | <INTEGER> ( "." <INTEGER> )?
@@ -43,12 +43,15 @@ TOKEN : /* Numeric Constants */
 
 TOKEN:
 {
-      < R_IDENTIFIER: ( <LETTER> )+ ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOLLAR> | <DOT> | <MINUS> )* >
+      < R_IDENTIFIER: ( <LETTER> )+ ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOLLAR> | <DOT> )* >
   |   < R_STRING: ( <QUOTE> ) ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOT> | <PLUS> | <MINUS> | <SEPARATOR> | <DOLLAR> )+ ( <QUOTE> ) >
   |   < R_DBLSTRING: ( <DOUBLEQUOTE> ) ( <DIGIT> | <LETTER> | <UNDERSCORE> | <DOT> | <PLUS> | <MINUS> | <SEPARATOR> | <DOLLAR> )+ ( <DOUBLEQUOTE> ) >
-  |   < R_OPERATOR: (["/", "!", "="]) | "%*%">
+  |   < R_OPERATOR: (["!", "="]) >
+  |   < MATMUL_OPERATOR: "%*%" >
+  |   < DIV_OPERATOR: "/" >
   |   < F_OPERATOR: ([":"] | "%in%") >
-  |   < COMMON_OPERATOR: (["+","-","*", "^"]) >
+  |   < TIMES_OPERATOR: "*" >
+  |   < POWER_OPERATOR: "^" >
   |   < COMMA: "," >
   |   < #LETTER: ["a"-"z", "A"-"Z"] >
   |   < #SUBSET: ["0"-"9", " ", ",", ":"] >
@@ -56,8 +59,8 @@ TOKEN:
   |   < #SEPARATOR: [";",":",",","_","."]>
   |   < #BRACKET: ["[", "]"] >
   |   < #DOLLAR: "$">
-  |   < #PLUS: "+">
-  |   < #MINUS: "-">
+  |   < PLUS: "+" >
+  |   < MINUS: "-" >
   |   < #DOT: ".">
   |   < #QUOTE: "'">
   |   < #DOUBLEQUOTE: "\"">
@@ -73,11 +76,61 @@ SimpleNode root() #root :
 void exp() #void :
 {Token op;}
 {
- (  LOOKAHEAD(2)
+ (  LOOKAHEAD(formulaTerm() "~")
     // Parse a formula as much as possible (A~B+C must not be parsed as (A~B) + C). This is why it comes first here.
     formula()
-  | simpleExp() [ (op=<R_OPERATOR> | op=<COMMON_OPERATOR>) exp() {jjtThis.value=op.image;} #BinaryOp(2) ]
+  | additiveExp() [ op=<R_OPERATOR> exp() {jjtThis.value=op.image;} #BinaryOp(2) ]
  )
+}
+
+// The productions below follow R's operator precedence (see ?Syntax), from the loosest to the tightest binding:
+// + - (left), * / (left), %*% (left), range, unary minus, ^ (right).
+void additiveExp() #void :
+{Token op;}
+{
+  multiplicativeExp() ( (op=<PLUS> | op=<MINUS>) multiplicativeExp() {jjtThis.value=op.image;} #BinaryOp(2) )*
+}
+
+void multiplicativeExp() #void :
+{Token op;}
+{
+  matrixExp() ( (op=<TIMES_OPERATOR> | op=<DIV_OPERATOR>) matrixExp() {jjtThis.value=op.image;} #BinaryOp(2) )*
+}
+
+void matrixExp() #void :
+{Token op;}
+{
+  rangeExp() ( op=<MATMUL_OPERATOR> rangeExp() {jjtThis.value=op.image;} #BinaryOp(2) )*
+}
+
+// A range is a single token that R would split: it cannot be an operand of ^ or of unary minus without parentheses,
+// otherwise 1:3^2 or -1:3 would be grouped differently from R.
+void rangeExp() #void :
+{}
+{
+  range() | unaryExp()
+}
+
+void unaryExp() #void :
+{}
+{
+  // A negative number stays a literal, unless ^ binds tighter than its sign: -2^2 is -(2^2).
+  LOOKAHEAD(<MINUS> <NUMBER> <POWER_OPERATOR>) negation()
+  | LOOKAHEAD(2) negativeNumber()
+  | negation()
+  | powerExp()
+}
+
+void negation() #void :
+{Token op;}
+{
+  op=<MINUS> unaryExp() {jjtThis.value=op.image;} #BinaryOp(1)
+}
+
+void powerExp() #void :
+{Token op;}
+{
+  simpleExp() [ op=<POWER_OPERATOR> unaryExp() {jjtThis.value=op.image;} #BinaryOp(2) ]
 }
 
 void simpleExp() #void :
@@ -111,8 +164,19 @@ void symbol() :
  (
     s=<R_IDENTIFIER>
   | s=<NUMBER>
-  | s=<RANGE>
  ) {jjtThis.value = s.image;}
+}
+
+void negativeNumber() #symbol :
+{Token s;}
+{
+  <MINUS> s=<NUMBER> {jjtThis.value = "-" + s.image;}
+}
+
+void range() #symbol :
+{Token s;}
+{
+  s=<RANGE> {jjtThis.value = s.image;}
 }
 
 void string() :
@@ -125,31 +189,27 @@ void string() :
 }
 
 void formula() #symbol :
-{Token t;
- StringBuilder ft;
- StringBuilder sb = new StringBuilder();}
+{StringBuilder lhs, rhs;}
 {
-  (
-    t=<R_IDENTIFIER> "~" {sb.append(t.image).append("~");}
-    (
-        ft=formulaTerm() {sb.append(ft);}
-    )
-    
-  ) {jjtThis.value = sb.toString();}
+  lhs=formulaTerm() "~" rhs=formulaTerm() {jjtThis.value = lhs.append("~").append(rhs).toString();}
 }
 
 StringBuilder formulaTerm() #void :
 {
   Token t;
   StringBuilder sb,ft;
+  String sign = "";
 }
 {
+  ( <MINUS> {sign += "-";} )*
   (
       "(" sb=formulaTerm() ")"  {sb.insert(0, '(').append(')');}
     | t=<R_IDENTIFIER> {sb = new StringBuilder(t.image);}
     | t=<NUMBER> {sb = new StringBuilder(t.image);}
+    | t=<RANGE> {sb = new StringBuilder(t.image);}
   )
-    [ (t=<COMMON_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
+  {sb.insert(0, sign);}
+    [ (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<DIV_OPERATOR> | t=<MATMUL_OPERATOR> | t=<POWER_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
   {return sb;}
 }
 
