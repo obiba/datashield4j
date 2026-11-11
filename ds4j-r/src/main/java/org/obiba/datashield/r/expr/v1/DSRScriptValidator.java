@@ -13,6 +13,7 @@ package org.obiba.datashield.r.expr.v1;
 import org.obiba.datashield.r.expr.InvalidScriptException;
 
 import java.util.Arrays;
+import java.util.Set;
 
 class DSRScriptValidator implements DataShieldGrammarVisitor {
 
@@ -53,6 +54,10 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
     if (isNamedArgument(node) && !isArgumentName(node.jjtGetChild(0))) {
       throw new InvalidScriptException("Invalid argument name.");
     }
+    // Ranges are limited to numbers, as R's ':' operator would also accept symbols and function calls.
+    if (":".equals(node.jjtGetValue()) && !(isNumeric(node.jjtGetChild(0)) && isNumeric(node.jjtGetChild(1)))) {
+      throw new InvalidScriptException("Range operands must be numbers.");
+    }
     return node.childrenAccept(this, data);
   }
 
@@ -80,7 +85,21 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
     return "=".equals(node.jjtGetValue()) && node.jjtGetParent() instanceof ASTfuncCall;
   }
 
-  // R only accepts a name or a string there: a symbol node can also hold a number, a range or a column (D$A).
+  // Mirrors the NUMBER token, optionally negated: a symbol can also hold a name, a column (D$A) or a whole formula.
+  private static final String NUMBER = "-?([0-9]+L?(\\.[0-9]+L?)?|\\.[0-9]+L?)([eE][-+]?[0-9]+)?";
+
+  private static final Set<String> ARITHMETIC_OPERATORS = Set.of("+", "-", "*", "/", "^", "%*%", ":");
+
+  private static boolean isNumeric(Node node) {
+    if (node instanceof ASTsymbol) return ((ASTsymbol) node).jjtGetValue().toString().matches(NUMBER);
+    if (!(node instanceof ASTBinaryOp) || !ARITHMETIC_OPERATORS.contains(((ASTBinaryOp) node).jjtGetValue())) return false;
+    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+      if (!isNumeric(node.jjtGetChild(i))) return false;
+    }
+    return true;
+  }
+
+  // R only accepts a name or a string there: a symbol node can also hold a number or a column (D$A).
   private static boolean isArgumentName(Node node) {
     return node instanceof ASTstring
         || node instanceof ASTsymbol && ((ASTsymbol) node).jjtGetValue().toString().matches("[a-zA-Z][\\w.]*");
