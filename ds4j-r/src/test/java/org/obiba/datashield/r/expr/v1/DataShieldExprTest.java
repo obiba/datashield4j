@@ -73,7 +73,7 @@ public class DataShieldExprTest {
       new TestCase("A negative number, large, exponential notation, French style, in double quote [2]", "\"-1.0E3\""),
       new TestCase("An embedded symbol", "A$B$C.D"),
       new TestCase("A subset symbol", "A[2, 1]"),
-      new TestCase("A subset symbol with range", "A[2, 1:2]"),
+      new TestCase("A subset symbol with range", "A[2, 1:2]", "A[2, base::':'(1, 2)]"),
       //new TestCase("An open row subset symbol", "A[,1]"),
       //new TestCase("An open column subset symbol", "A[1,]"),
       //new TestCase("A subset symbol with range", "A[,1:2]"),
@@ -82,7 +82,7 @@ public class DataShieldExprTest {
       new TestCase("A subtraction in a subset", "A[1 -2]", "A[base::'-'(1, 2)]"),
       new TestCase("A subtraction of a symbol in a subset", "A[B -1]", "A[base::'-'(B, 1)]"),
       new TestCase("A subtraction from a negative number in a subset", "A[-1 -2]", "A[base::'-'(-1, 2)]"),
-      new TestCase("A subtraction from a range in a subset", "D[1:2 -1]", "D[base::'-'(1:2, 1)]"),
+      new TestCase("A subtraction from a range in a subset", "D[1:2 -1]", "D[base::'-'(base::':'(1, 2), 1)]"),
       new TestCase("Negative numbers in a subset", "A[1, -2]"),
       //new TestCase("An almost empty subset symbol", "A[,]"),
       //new TestCase("A subset value symbol", "A[[1]]"),
@@ -118,10 +118,17 @@ public class DataShieldExprTest {
       new TestCase("Power binds tighter than the sign of a number", "-2 ^ 2", "base::'-'(base::'^'(2, 2))"),
       new TestCase("Negative exponent", "2 ^ -1", "base::'^'(2, -1)"),
       new TestCase("Negative number as an argument", "A(-1, x = -2.5)", "dsBase::A(-1, x = -2.5)"),
-      new TestCase("A range", "1:3"),
-      new TestCase("A range as an argument", "A(1:3)", "dsBase::A(1:3)"),
-      new TestCase("A range as an operand", "2 * 1:3", "base::'*'(2, 1:3)"),
-      new TestCase("A grouped range as an operand of power", "(1:3) ^ 2", "base::'^'(1:3, 2)"),
+      new TestCase("A range", "1:3", "base::':'(1, 3)"),
+      new TestCase("A range with a decimal bound", "2:0.5", "base::':'(2, 0.5)"),
+      new TestCase("A range binds looser than power", "1:3^2", "base::':'(1, base::'^'(3, 2))"),
+      new TestCase("A range of a power", "2^1:3", "base::':'(base::'^'(2, 1), 3)"),
+      new TestCase("A range binds looser than unary minus", "-1:3", "base::':'(-1, 3)"),
+      new TestCase("A negative range as an operand", "2 * -1:3", "base::'*'(2, base::':'(-1, 3))"),
+      new TestCase("A range is left associative", "1:2:3", "base::':'(base::':'(1, 2), 3)"),
+      new TestCase("A range of grouped expressions", "(1 + 1):(2 * 3)", "base::':'(base::'+'(1, 1), base::'*'(2, 3))"),
+      new TestCase("A range as an argument", "A(1:3)", "dsBase::A(base::':'(1, 3))"),
+      new TestCase("A range as an operand", "2 * 1:3", "base::'*'(2, base::':'(1, 3))"),
+      new TestCase("A grouped range as an operand of power", "(1:3) ^ 2", "base::'^'(base::':'(1, 3), 2)"),
       new TestCase("A formula with a negative intercept", "A ~ -1 + B", "A~-1+B"),
       new TestCase("A formula removing the intercept", "A ~ B - 1", "A~B-1"),
       new TestCase("A formula removing the intercept, without spaces", "A~B-1", "A~B-1"),
@@ -132,6 +139,7 @@ public class DataShieldExprTest {
       new TestCase("A formula with a sum as response is not an addition", "A + B ~ C", "A+B~C"),
       new TestCase("A formula with a numeric range", "A ~ 2:3", "A~2:3"),
       new TestCase("A formula with a numeric range as response", "1:3^2 ~ A", "1:3^2~A"),
+      new TestCase("A formula with a decimal range", "A ~ 2:0.5", "A~2:0.5"),
       new TestCase("A formula with a division", "A ~ B / C", "A~B/C"),
       new TestCase("A formula with a division as response", "A / 2 ~ B", "A/2~B"),
       new TestCase("A formula with a matrix product", "A ~ B %*% C", "A~B%*%C"),
@@ -214,21 +222,6 @@ public class DataShieldExprTest {
   }
 
   @Test(expected = ParseException.class)
-  public void test_rangeAsPowerBase() throws ParseException {
-    doTest("R reads it as 1:(3^2)", "1:3^2");
-  }
-
-  @Test(expected = ParseException.class)
-  public void test_rangeAsPowerExponent() throws ParseException {
-    doTest("R reads it as (2^1):3", "2^1:3");
-  }
-
-  @Test(expected = ParseException.class)
-  public void test_negativeRange() throws ParseException {
-    doTest("R reads it as (-1):3", "-1:3");
-  }
-
-  @Test(expected = ParseException.class)
   public void test_formulaWithMinusBeforeTilde() throws ParseException {
     doTest("R reads it as A minus a one-sided formula", "A-~B");
   }
@@ -241,6 +234,18 @@ public class DataShieldExprTest {
         Assert.fail("Expected an invalid script: " + script);
       } catch (InvalidScriptException e) {
         Assert.assertEquals("Invalid argument name.", e.getMessage());
+      }
+    }
+  }
+
+  @Test
+  public void test_rangeOperandsMustBeNumbers() throws ParseException {
+    for (String script : new String[]{"a:b", "1:n", "A(1:B())", "1:'3'", "-x:3", "1:(2 + x)"}) {
+      try {
+        doTestVisitor(script, null);
+        Assert.fail("Expected an invalid script: " + script);
+      } catch (InvalidScriptException e) {
+        Assert.assertEquals("Range operands must be numbers.", e.getMessage());
       }
     }
   }
@@ -261,11 +266,11 @@ public class DataShieldExprTest {
   public void test_aggregateAcceptedScripts() throws ParseException {
     String[][] scripts = {
         {"A(B, 1, 'c', -1)", "dsBase::A(B, 1, 'c', -1)"},
-        {"A(x = -1, y = B(z = 1:3))", "dsBase::A(x = -1, y = dsBase::B(z = 1:3))"},
+        {"A(x = -1, y = B(z = 1:3))", "dsBase::A(x = -1, y = dsBase::B(z = base::':'(1, 3)))"},
         {"A(B ~ C + D, poisson)", "dsBase::A(B~C+D, poisson)"},
         {"A(B + C)", "dsBase::A(base::'+'(B, C))"},
         {"A(-B)", "dsBase::A(base::'-'(B))"},
-        {"A(1:3-1)", "dsBase::A(base::'-'(1:3, 1))"},
+        {"A(1:3-1)", "dsBase::A(base::'-'(base::':'(1, 3), 1))"},
         {"A(x = B * 2)", "dsBase::A(x = base::'*'(B, 2))"},
         {"A(B(C / 2))", "dsBase::A(dsBase::B(base::'/'(C, 2)))"}};
     for (String[] script : scripts) {

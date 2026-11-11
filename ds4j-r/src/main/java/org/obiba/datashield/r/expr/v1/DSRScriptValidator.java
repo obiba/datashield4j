@@ -53,6 +53,10 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
     if (isNamedArgument(node) && !isArgumentName(node.jjtGetChild(0))) {
       throw new InvalidScriptException("Invalid argument name.");
     }
+    // Ranges are limited to numbers, as R's ':' operator would also accept symbols and function calls.
+    if (":".equals(node.jjtGetValue()) && !(isNumeric(node.jjtGetChild(0)) && isNumeric(node.jjtGetChild(1)))) {
+      throw new InvalidScriptException("Range operands must be numbers.");
+    }
     return node.childrenAccept(this, data);
   }
 
@@ -80,7 +84,17 @@ class DSRScriptValidator implements DataShieldGrammarVisitor {
     return "=".equals(node.jjtGetValue()) && node.jjtGetParent() instanceof ASTfuncCall;
   }
 
-  // R only accepts a name or a string there: a symbol node can also hold a number, a range or a column (D$A).
+  // A symbol is either a name, starting with a letter, or a number.
+  private static boolean isNumeric(Node node) {
+    if (node instanceof ASTsymbol) return !((ASTsymbol) node).jjtGetValue().toString().matches("[a-zA-Z].*");
+    if (!(node instanceof ASTBinaryOp)) return false;
+    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+      if (!isNumeric(node.jjtGetChild(i))) return false;
+    }
+    return true;
+  }
+
+  // R only accepts a name or a string there: a symbol node can also hold a number or a column (D$A).
   private static boolean isArgumentName(Node node) {
     return node instanceof ASTstring
         || node instanceof ASTsymbol && ((ASTsymbol) node).jjtGetValue().toString().matches("[a-zA-Z][\\w.]*");

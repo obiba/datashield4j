@@ -32,7 +32,6 @@ SKIP:
 TOKEN : /* Numeric Constants */
 {
        < NUMBER: <FLOAT> ( ["e","E"] ([ "-","+"])? ( <DIGIT> )+ )? >
- |     < RANGE: ( <DIGIT> )+ ":" ( <DIGIT> )+ >
  |     < #FLOAT: <INTEGER>
            | <INTEGER> ( "." <INTEGER> )?
            | "." <INTEGER>
@@ -49,7 +48,8 @@ TOKEN:
   |   < R_OPERATOR: (["!", "="]) >
   |   < MATMUL_OPERATOR: "%*%" >
   |   < DIV_OPERATOR: "/" >
-  |   < F_OPERATOR: ([":"] | "%in%") >
+  |   < COLON: ":" >
+  |   < F_OPERATOR: "%in%" >
   |   < TIMES_OPERATOR: "*" >
   |   < POWER_OPERATOR: "^" >
   |   < COMMA: "," >
@@ -103,12 +103,10 @@ void matrixExp() #void :
   rangeExp() ( op=<MATMUL_OPERATOR> rangeExp() {jjtThis.value=op.image;} #BinaryOp(2) )*
 }
 
-// A range is a single token that R would split: it cannot be an operand of ^ or of unary minus without parentheses,
-// otherwise 1:3^2 or -1:3 would be grouped differently from R.
 void rangeExp() #void :
-{}
+{Token op;}
 {
-  range() | unaryExp()
+  unaryExp() ( op=<COLON> unaryExp() {jjtThis.value=op.image;} #BinaryOp(2) )*
 }
 
 void unaryExp() #void :
@@ -180,12 +178,6 @@ void negativeNumber() #symbol :
   <MINUS> s=<NUMBER> {jjtThis.value = "-" + s.image;}
 }
 
-void range() #symbol :
-{Token s;}
-{
-  s=<RANGE> {jjtThis.value = s.image;}
-}
-
 void string() :
 {Token s=null;}
 {
@@ -213,10 +205,9 @@ StringBuilder formulaTerm() #void :
       "(" sb=formulaTerm() ")"  {sb.insert(0, '(').append(')');}
     | t=<R_IDENTIFIER> {sb = new StringBuilder(t.image);}
     | t=<NUMBER> {sb = new StringBuilder(t.image);}
-    | t=<RANGE> {sb = new StringBuilder(t.image);}
   )
   {sb.insert(0, sign);}
-    [ LOOKAHEAD(1) (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<DIV_OPERATOR> | t=<MATMUL_OPERATOR> | t=<POWER_OPERATOR> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
+    [ LOOKAHEAD(1) (t=<PLUS> | t=<MINUS> | t=<TIMES_OPERATOR> | t=<DIV_OPERATOR> | t=<MATMUL_OPERATOR> | t=<POWER_OPERATOR> | t=<COLON> | t=<F_OPERATOR>) ft=formulaTerm() {sb.append(t.image).append(ft);} ]
   {return sb;}
 }
 
